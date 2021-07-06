@@ -13,6 +13,7 @@ router.get("/", async (req, res) => {
   const browser = await puppeteer.launch({
     headless: false,
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    slowMo: 1,
   });
 
   const page = await browser.newPage();
@@ -26,7 +27,7 @@ router.get("/", async (req, res) => {
     await page.click("#fm-login-id");
     await page.type("#fm-login-id", "namnt691997@gmail.com");
     await page.click("#fm-login-password");
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
     let checkCode = await page.$eval(
       ".fm-checkcode",
       (el) => el?.style?.display || ""
@@ -39,7 +40,7 @@ router.get("/", async (req, res) => {
   }
   await page.type("#fm-login-password", "namnguyen691997");
   await page.click("button[type='submit']");
-  await page.waitForTimeout(2000);
+  await page.waitForNavigation();
   await page.goto(
     "https://vi.aliexpress.com/store/5747126/search/2.html?spm=a2g0o.store_pc_allProduct.8148361.1.5146367dd2Mfoy&origin=n&SortType=bestmatch_sort",
     {
@@ -72,17 +73,57 @@ router.get("/", async (req, res) => {
     listUrl = [...listUrl, ...itemLink];
     console.log(itemLink);
   }
-
-  const detailProduct = await Promise.all(
-    listUrl.slice(0, 30).map((url) => crawlProduct(url))
+  listUrl = listUrl.map(
+    (item) =>
+      "https://aliexpress" +
+      item.split("aliexpress")[item.split("aliexpress").length - 1]
   );
-  console.log(detailProduct);
+  let detailProducts = [];
+  const subArrCount = Math.ceil(listUrl.length / 3);
+
+  let subArrUrl = [];
+
+  for (let i = 1; i <= subArrCount; i++) {
+    subArrUrl.push(listUrl.slice(3 * (i - 1), 3 * i));
+  }
+
+  while (subArrUrl.length > 0) {
+    for (let index = 0; index < subArrUrl.length; index++) {
+      const urls = subArrUrl[index];
+      try {
+        const products = await Promise.all(
+          urls.map((url) => crawlProduct(url))
+        );
+        console.log(index);
+        detailProducts = [...detailProducts, ...products];
+        if (index === subArrUrl.length - 1) {
+          subArrUrl = [];
+        }
+      } catch (error) {
+        console.log(error.config.url);
+        subArrUrl = subArrUrl.slice(index);
+        subArrUrl = [
+          ...subArrUrl.slice(0, index),
+          subArrUrl[index].filter((item) => item != error.config.url),
+          ...subArrUrl.slice(index + 1),
+        ];
+        await wait(2000);
+        break;
+      }
+    }
+  }
+
+  console.log(detailProducts);
+  await browser.close();
 
   res.status(200).json();
 });
 
+const wait = (timeToDelay) =>
+  new Promise((resolve) => setTimeout(resolve, timeToDelay));
+
 const crawlProduct = async (url) => {
-  const html = (await axios("https:" + url)).data;
+  const html = (await axios(url)).data;
   const dom = new JSDOM(html, {
     runScripts: "dangerously",
   });
