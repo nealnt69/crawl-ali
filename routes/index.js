@@ -4,11 +4,13 @@ const jsdom = require("jsdom");
 const cheerio = require("cheerio");
 const puppeteer = require("puppeteer");
 const { JSDOM } = jsdom;
+const HttpsProxyAgent = require("https-proxy-agent");
 
 var router = express.Router();
 
 router.get("/", async (req, res) => {
   let listUrl = [];
+  let detailProducts = [];
   let stopLogin = 1;
   const browser = await puppeteer.launch({
     headless: false,
@@ -42,7 +44,7 @@ router.get("/", async (req, res) => {
   await page.click("button[type='submit']");
   await page.waitForNavigation();
   await page.goto(
-    "https://vi.aliexpress.com/store/5747126/search/2.html?spm=a2g0o.store_pc_allProduct.8148361.1.5146367dd2Mfoy&origin=n&SortType=bestmatch_sort",
+    "https://www.aliexpress.com/store/all-wholesale-products/432780.html",
     {
       waitUntil: "domcontentloaded",
     }
@@ -51,15 +53,9 @@ router.get("/", async (req, res) => {
   let index = 1;
   while (stop < 1) {
     console.log(index);
-    await page.click(".ui-pagination-next");
     await page.waitForTimeout(2000);
-    let checkStop = await page.evaluate(() =>
-      document.querySelector(".ui-pagination-disabled")
-    );
-    if (checkStop) {
-      stop++;
-      break;
-    }
+    await wait(2000);
+    await autoScroll(page);
     const itemLink = await page.evaluate(() => {
       let listLink = [];
       let elements = document.getElementsByClassName("pic-rind");
@@ -71,52 +67,70 @@ router.get("/", async (req, res) => {
     });
     index++;
     listUrl = [...listUrl, ...itemLink];
-    console.log(itemLink);
-  }
-  listUrl = listUrl.map(
-    (item) =>
-      "https://aliexpress" +
-      item.split("aliexpress")[item.split("aliexpress").length - 1]
-  );
-  let detailProducts = [];
-  const subArrCount = Math.ceil(listUrl.length / 3);
+    let convertListUrl = itemLink.map(
+      (item) =>
+        "https://aliexpress" +
+        item.split("aliexpress")[item.split("aliexpress").length - 1]
+    );
+    const subArrCount = Math.ceil(convertListUrl.length / 1);
 
-  let subArrUrl = [];
+    let subArrUrl = [];
 
-  for (let i = 1; i <= subArrCount; i++) {
-    subArrUrl.push(listUrl.slice(3 * (i - 1), 3 * i));
-  }
+    for (let i = 1; i <= subArrCount; i++) {
+      subArrUrl.push(convertListUrl.slice(1 * (i - 1), 1 * i));
+    }
 
-  while (subArrUrl.length > 0) {
-    for (let index = 0; index < subArrUrl.length; index++) {
-      const urls = subArrUrl[index];
-      try {
-        const products = await Promise.all(
-          urls.map((url) => crawlProduct(url))
-        );
-        console.log(index);
-        detailProducts = [...detailProducts, ...products];
-        if (index === subArrUrl.length - 1) {
-          subArrUrl = [];
+    while (subArrUrl.length > 0) {
+      for (let index = 0; index < subArrUrl.length; index++) {
+        const urls = subArrUrl[index];
+        try {
+          const products = await Promise.all(
+            urls.map((url) => crawlProduct(url))
+          );
+          console.log(index);
+          detailProducts = [...detailProducts, ...products];
+          if (index === subArrUrl.length - 1) {
+            subArrUrl = [];
+          }
+        } catch (error) {
+          console.log(error.config.url);
+          subArrUrl = subArrUrl.slice(index + 1);
+          // subArrUrl = [
+          //   ...subArrUrl.slice(0, index),
+          //   subArrUrl[index].filter((item) => item != error.config.url),
+          //   ...subArrUrl.slice(index + 1),
+          // ];
+          await wait(2000);
+          break;
         }
-      } catch (error) {
-        console.log(error.config.url);
-        subArrUrl = subArrUrl.slice(index);
-        subArrUrl = [
-          ...subArrUrl.slice(0, index),
-          subArrUrl[index].filter((item) => item != error.config.url),
-          ...subArrUrl.slice(index + 1),
-        ];
-        await wait(2000);
-        break;
       }
+    }
+    let checkStop = await page.evaluate(() =>
+      document.querySelector(
+        "[class='ui-pagination-next ui-pagination-disabled']"
+      )
+    );
+    if (checkStop) {
+      stop++;
+      break;
+    } else {
+      console.log(itemLink);
+      await page.click(".ui-pagination-next");
     }
   }
 
-  console.log(detailProducts);
+  console.log("done");
   await browser.close();
 
   res.status(200).json();
+});
+
+router.get("/single", async (req, res) => {
+  const data = await crawlProduct(
+    "https://aliexpress.com/item/4000912998216.html?spm=a2g0o.ams_97944.topranking.2.6620bGQlbGQl7r&scm=1007.26694.226824.0&scm_id=1007.26694.226824.0&scm-url=1007.26694.226824.0&pvid=56d17034-c7a4-4285-ad19-e0fbbbbcc2e2&fromRankId=4500689&_t=fromRankId:4500689"
+  );
+  console.log(data);
+  res.status(200).json("ok");
 });
 
 const wait = (timeToDelay) =>
@@ -130,12 +144,12 @@ const crawlProduct = async (url) => {
 
   const data = dom.window.runParams.data;
   const sku = data.commonModule.productId;
-  const title = data.pageModule.title;
+  const title = data.titleModule.subject;
   let description = "";
   const linkDescription = data.descriptionModule.descriptionUrl;
   const htmlDescription = (await axios(linkDescription)).data;
   const $ = cheerio.load(htmlDescription);
-  const text = $(".detailmodule_text  p");
+  const text = $("p[class*='detail']");
   if (text.length > 0) {
     for (let index = 0; index < text.length; index++) {
       const element = $(text[index]);
@@ -326,5 +340,24 @@ const filter = (list) => {
     return item.qty > 0;
   });
 };
+
+async function autoScroll(page) {
+  await page.evaluate(async () => {
+    await new Promise((resolve, reject) => {
+      let totalHeight = 0;
+      let distance = 1000;
+      let timer = setInterval(() => {
+        let scrollHeight = document.body.scrollHeight;
+        window.scrollBy(0, distance);
+        totalHeight += distance;
+
+        if (totalHeight >= scrollHeight - 1500) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, 200);
+    });
+  });
+}
 
 module.exports = router;
