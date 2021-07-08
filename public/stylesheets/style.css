@@ -142,7 +142,7 @@ ul {
 }
 
 .input:focus ~ .placeholder {
-  color: #dc2f55;
+  color: #08d;
 }
 
 .submit {

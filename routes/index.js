@@ -29,7 +29,7 @@ router.post("/crawl", async (req, res) => {
   let detailProducts = [];
   let stopLogin = 1;
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
     slowMo: 1,
   });
