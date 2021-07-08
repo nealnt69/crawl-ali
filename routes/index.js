@@ -7,12 +7,13 @@ const { JSDOM } = jsdom;
 const mongoose = require("mongoose");
 const storeModel = require("../db/schema/store");
 const productModel = require("../db/schema/product");
+const moment = require("moment");
 
 var router = express.Router();
 
 router.get("/", async (req, res) => {
   const listCrawl = await storeModel.find().sort({ created_at: -1 });
-  res.render("index", { title: "Crawl Ali", listCrawl });
+  res.render("index", { title: "Crawl Ali", listCrawl, moment: moment });
 });
 
 router.get("/download", async (req, res) => {

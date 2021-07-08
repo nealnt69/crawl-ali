@@ -33,7 +33,7 @@ ul {
 }
 
 .crawl-store {
-  width: calc(100% - 220px);
+  width: calc(100% - 240px);
   margin-right: 48px;
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -46,6 +46,10 @@ ul {
   cursor: pointer;
   color: green;
   font-weight: 600;
+}
+
+.crawl-date {
+  margin-left: 16px;
 }
 
 .form {
