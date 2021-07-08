@@ -8,7 +8,7 @@ const HttpsProxyAgent = require("https-proxy-agent");
 
 var router = express.Router();
 
-router.get("/", async (req, res) => {
+router.get("/crawl", async (req, res) => {
   let listUrl = [];
   let detailProducts = [];
   let stopLogin = 1;
@@ -43,6 +43,7 @@ router.get("/", async (req, res) => {
   await page.type("#fm-login-password", "namnguyen691997");
   await page.click("button[type='submit']");
   await page.waitForNavigation();
+  res.status(200).json();
   await page.goto(
     "https://www.aliexpress.com/store/all-wholesale-products/432780.html",
     {
@@ -72,12 +73,12 @@ router.get("/", async (req, res) => {
         "https://aliexpress" +
         item.split("aliexpress")[item.split("aliexpress").length - 1]
     );
-    const subArrCount = Math.ceil(convertListUrl.length / 1);
+    const subArrCount = Math.ceil(convertListUrl.length / 2);
 
     let subArrUrl = [];
 
     for (let i = 1; i <= subArrCount; i++) {
-      subArrUrl.push(convertListUrl.slice(1 * (i - 1), 1 * i));
+      subArrUrl.push(convertListUrl.slice(2 * (i - 1), 2 * i));
     }
 
     while (subArrUrl.length > 0) {
@@ -87,6 +88,9 @@ router.get("/", async (req, res) => {
           const products = await Promise.all(
             urls.map((url) => crawlProduct(url))
           );
+          if (!products) {
+            console.log(products);
+          }
           console.log(index);
           detailProducts = [...detailProducts, ...products];
           if (index === subArrUrl.length - 1) {
@@ -121,8 +125,6 @@ router.get("/", async (req, res) => {
 
   console.log("done");
   await browser.close();
-
-  res.status(200).json();
 });
 
 router.get("/single", async (req, res) => {
@@ -137,77 +139,92 @@ const wait = (timeToDelay) =>
   new Promise((resolve) => setTimeout(resolve, timeToDelay));
 
 const crawlProduct = async (url) => {
-  const html = (await axios(url)).data;
-  const dom = new JSDOM(html, {
-    runScripts: "dangerously",
-  });
+  try {
+    const html = (await axios(url)).data;
+    const dom = new JSDOM(html, {
+      runScripts: "dangerously",
+    });
 
-  const data = dom.window.runParams.data;
-  const sku = data.commonModule.productId;
-  const title = data.titleModule.subject;
-  let description = "";
-  const linkDescription = data.descriptionModule.descriptionUrl;
-  const htmlDescription = (await axios(linkDescription)).data;
-  const $ = cheerio.load(htmlDescription);
-  const text = $("p[class*='detail']");
-  if (text.length > 0) {
-    for (let index = 0; index < text.length; index++) {
-      const element = $(text[index]);
-      let textHtml = element.html();
-      description = description
-        .concat(textHtml.slice(0).replace(/<br>/gm, "\n"))
-        .concat("\n");
+    const data = dom.window.runParams.data;
+    const sku = data.commonModule.productId;
+    const title = data.titleModule.subject;
+    let description = "";
+    const linkDescription = data.descriptionModule.descriptionUrl;
+    const htmlDescription = (await axios(linkDescription)).data;
+    const $ = cheerio.load(htmlDescription);
+    const textP = $("p[class*='detail']");
+    const textSpan = $("span[style]");
+    if (textP.length > 0) {
+      for (let index = 0; index < textP.length; index++) {
+        const element = $(textP[index]);
+        let textPHtml = element.html();
+        description = description
+          .concat(textPHtml.slice(0).replace(/<br>/gm, "\n"))
+          .concat("\n");
+      }
     }
-  }
-  const ortherImage = data.imageModule.imagePathList;
-  const productSKUPropertyList = data.skuModule.productSKUPropertyList;
-  const productSKUPriceList = data.skuModule.skuPriceList;
-  let childrenSku = [];
-  if (productSKUPropertyList) {
-    switch (productSKUPropertyList.length) {
-      case 1:
-        childrenSku = getChildreFromOneSku(
-          productSKUPropertyList,
-          productSKUPriceList
-        );
-        break;
-      case 2:
-        childrenSku = getChildreFromTwoSku(
-          productSKUPropertyList,
-          productSKUPriceList
-        );
-        break;
-      case 3:
-        childrenSku = getChildreFromThreeSku(
-          productSKUPropertyList,
-          productSKUPriceList
-        );
-        break;
-      default:
-        break;
+    if (textSpan.length > 0) {
+      for (let index = 0; index < textSpan.length; index++) {
+        const element = $(textSpan[index]);
+        let textSpanHtml = element.html();
+        description = description
+          .concat(textSpanHtml.slice(0).replace(/<br>/gm, "\n"))
+          .concat("\n");
+      }
     }
-  } else {
-    childrenSku = [
-      {
-        proIds: ``,
-        image: "",
-        price:
-          productSKUPriceList[0].skuVal.actSkuCalPrice ||
-          productSKUPriceList[0].skuVal.skuCalPrice ||
-          0,
-        qty: productSKUPriceList[0].skuVal.availQuantity || 0,
-        type: "single",
-      },
-    ];
+    const ortherImage = data.imageModule.imagePathList;
+    const productSKUPropertyList = data.skuModule.productSKUPropertyList;
+    const productSKUPriceList = data.skuModule.skuPriceList;
+    let childrenSku = [];
+    if (productSKUPropertyList) {
+      switch (productSKUPropertyList.length) {
+        case 1:
+          childrenSku = getChildreFromOneSku(
+            productSKUPropertyList,
+            productSKUPriceList
+          );
+          break;
+        case 2:
+          childrenSku = getChildreFromTwoSku(
+            productSKUPropertyList,
+            productSKUPriceList
+          );
+          break;
+        case 3:
+          childrenSku = getChildreFromThreeSku(
+            productSKUPropertyList,
+            productSKUPriceList
+          );
+          break;
+        default:
+          break;
+      }
+    } else {
+      childrenSku = [
+        {
+          proIds: ``,
+          image: "",
+          price:
+            productSKUPriceList[0].skuVal.actSkuCalPrice ||
+            productSKUPriceList[0].skuVal.skuCalPrice ||
+            0,
+          qty: productSKUPriceList[0].skuVal.availQuantity || 0,
+          type: "single",
+        },
+      ];
+    }
+    childrenSku = filter(childrenSku);
+    return {
+      sku,
+      title,
+      description,
+      ortherImage,
+      childrenSku,
+    };
+  } catch (error) {
+    console.log(error);
+    return null;
   }
-  childrenSku = filter(childrenSku);
-  return {
-    sku,
-    title,
-    description,
-    ortherImage,
-    childrenSku,
-  };
 };
 
 const getChildreFromOneSku = (productSKUPropertyList, productSKUPriceList) => {
