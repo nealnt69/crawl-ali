@@ -4,11 +4,27 @@ const jsdom = require("jsdom");
 const cheerio = require("cheerio");
 const puppeteer = require("puppeteer");
 const { JSDOM } = jsdom;
-const HttpsProxyAgent = require("https-proxy-agent");
+const mongoose = require("mongoose");
+const storeModel = require("../db/schema/store");
+const productModel = require("../db/schema/product");
 
 var router = express.Router();
 
-router.get("/crawl", async (req, res) => {
+router.get("/", async (req, res) => {
+  const listCrawl = await storeModel.find().sort({ created_at: -1 });
+  res.render("index", { title: "Crawl Ali", listCrawl });
+});
+
+router.get("/download", async (req, res) => {
+  const { id } = req.query;
+  const store = await storeModel.findById(id).lean();
+  const products = await productModel.find({ store: id });
+  res.status(200).json({ store, products });
+});
+
+router.post("/crawl", async (req, res) => {
+  const { url, ship, num, prefix, length } = req.body;
+  const id = mongoose.Types.ObjectId();
   let listUrl = [];
   let detailProducts = [];
   let stopLogin = 1;
@@ -44,12 +60,9 @@ router.get("/crawl", async (req, res) => {
   await page.click("button[type='submit']");
   await page.waitForNavigation();
   res.status(200).json();
-  await page.goto(
-    "https://www.aliexpress.com/store/all-wholesale-products/432780.html",
-    {
-      waitUntil: "domcontentloaded",
-    }
-  );
+  await page.goto(url, {
+    waitUntil: "domcontentloaded",
+  });
   let stop = 0;
   let index = 1;
   while (stop < 1) {
@@ -66,7 +79,6 @@ router.get("/crawl", async (req, res) => {
       }
       return listLink;
     });
-    index++;
     listUrl = [...listUrl, ...itemLink];
     let convertListUrl = itemLink.map(
       (item) =>
@@ -82,8 +94,8 @@ router.get("/crawl", async (req, res) => {
     }
 
     while (subArrUrl.length > 0) {
-      for (let index = 0; index < subArrUrl.length; index++) {
-        const urls = subArrUrl[index];
+      for (let i = 0; i < subArrUrl.length; i++) {
+        const urls = subArrUrl[i];
         try {
           const products = await Promise.all(
             urls.map((url) => crawlProduct(url))
@@ -91,14 +103,14 @@ router.get("/crawl", async (req, res) => {
           if (!products) {
             console.log(products);
           }
-          console.log(index);
+          console.log(i);
           detailProducts = [...detailProducts, ...products];
-          if (index === subArrUrl.length - 1) {
+          if (i === subArrUrl.length - 1) {
             subArrUrl = [];
           }
         } catch (error) {
           console.log(error.config.url);
-          subArrUrl = subArrUrl.slice(index + 1);
+          subArrUrl = subArrUrl.slice(i + 1);
           // subArrUrl = [
           //   ...subArrUrl.slice(0, index),
           //   subArrUrl[index].filter((item) => item != error.config.url),
@@ -109,6 +121,23 @@ router.get("/crawl", async (req, res) => {
         }
       }
     }
+    await storeModel.updateOne(
+      { _id: id },
+      {
+        url,
+        page: index,
+        ship,
+        num,
+        prefix,
+        length,
+      },
+      { upsert: true }
+    );
+    await productModel.insertMany(
+      detailProducts.map((product) => ({ ...product, store: id }))
+    );
+    detailProducts = [];
+    index++;
     let checkStop = await page.evaluate(() =>
       document.querySelector(
         "[class='ui-pagination-next ui-pagination-disabled']"
@@ -118,8 +147,16 @@ router.get("/crawl", async (req, res) => {
       stop++;
       break;
     } else {
-      console.log(itemLink);
-      await page.click(".ui-pagination-next");
+      let checkNext = await page.evaluate(() =>
+        document.querySelector("[class='ui-pagination-next']")
+      );
+      if (checkNext) {
+        console.log(itemLink);
+        await page.click(".ui-pagination-next");
+      } else {
+        stop++;
+        break;
+      }
     }
   }
 
@@ -203,6 +240,7 @@ const crawlProduct = async (url) => {
       childrenSku = [
         {
           proIds: ``,
+          composeColor: "",
           image: "",
           price:
             productSKUPriceList[0].skuVal.actSkuCalPrice ||
@@ -235,6 +273,7 @@ const getChildreFromOneSku = (productSKUPropertyList, productSKUPriceList) => {
     const element1 = pro1.skuPropertyValues[i];
     arr.push({
       [proName1]: element1.propertyValueDisplayName,
+      composeColor: element1.propertyValueDisplayName,
       proIds: `${element1.propertyValueIdLong}`,
       image: element1.skuPropertyImagePath,
       price:
@@ -267,6 +306,10 @@ const getChildreFromTwoSku = (productSKUPropertyList, productSKUPriceList) => {
       arr.push({
         [proName1]: element1.propertyValueDisplayName,
         [proName2]: element2.propertyValueDisplayName,
+        composeColor:
+          element1.propertyValueDisplayName +
+          " " +
+          element2.propertyValueDisplayName,
         proIds: `${element1.propertyValueIdLong},${element2.propertyValueIdLong}`,
         image: element1.skuPropertyImagePath || element2.skuPropertyImagePath,
         price:
@@ -314,6 +357,13 @@ const getChildreFromThreeSku = (
           [proName1]: element1.propertyValueDisplayName,
           [proName2]: element2.propertyValueDisplayName,
           [proName3]: element3.propertyValueDisplayName,
+          composeColor:
+            element1.propertyValueDisplayName +
+            " " +
+            element2.propertyValueDisplayName +
+            " " +
+            element3.propertyValueDisplayName,
+
           proIds: `${element1.propertyValueIdLong},${element2.propertyValueIdLong},${element3.propertyValueIdLong}`,
           image:
             element1.skuPropertyImagePath ||

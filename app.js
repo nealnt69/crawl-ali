@@ -8,6 +8,15 @@ var indexRouter = require("./routes/index");
 
 var app = express();
 
+const db = require("./db/connection");
+
+// connect DB
+db.on("open", () => {
+  console.log("Connect mongoDB success");
+});
+
+db.on("error", console.error.bind(console, "connection error:"));
+
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
