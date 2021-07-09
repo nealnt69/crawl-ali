@@ -93,7 +93,7 @@ router.post("/crawl", async (req, res) => {
     for (let i = 1; i <= subArrCount; i++) {
       subArrUrl.push(convertListUrl.slice(2 * (i - 1), 2 * i));
     }
-
+    let skip = 0;
     while (subArrUrl.length > 0) {
       for (let i = 0; i < subArrUrl.length; i++) {
         const urls = subArrUrl[i];
@@ -105,20 +105,27 @@ router.post("/crawl", async (req, res) => {
             console.log(products);
           }
           console.log(i);
+          skip = 0;
           detailProducts = [...detailProducts, ...products];
           if (i === subArrUrl.length - 1) {
             subArrUrl = [];
           }
         } catch (error) {
-          console.log(error.config.url);
-          subArrUrl = subArrUrl.slice(i + 1);
-          // subArrUrl = [
-          //   ...subArrUrl.slice(0, index),
-          //   subArrUrl[index].filter((item) => item != error.config.url),
-          //   ...subArrUrl.slice(index + 1),
-          // ];
-          await wait(2000);
-          break;
+          if (skip === 0) {
+            console.log(error?.config?.url);
+            subArrUrl = subArrUrl.slice(i);
+            skip++;
+            await wait(5000);
+            break;
+          } else {
+            if (skip === 10) {
+              subArrUrl = [];
+            } else {
+              subArrUrl = subArrUrl.slice(i + 1);
+            }
+            await wait(5000);
+            break;
+          }
         }
       }
     }
@@ -166,11 +173,11 @@ router.post("/crawl", async (req, res) => {
 });
 
 router.get("/single", async (req, res) => {
+  res.status(200).json("ok");
   const data = await crawlProduct(
-    "https://aliexpress.com/item/4000912998216.html?spm=a2g0o.ams_97944.topranking.2.6620bGQlbGQl7r&scm=1007.26694.226824.0&scm_id=1007.26694.226824.0&scm-url=1007.26694.226824.0&pvid=56d17034-c7a4-4285-ad19-e0fbbbbcc2e2&fromRankId=4500689&_t=fromRankId:4500689"
+    "https://vi.aliexpress.com/item/4000109697862.html"
   );
   console.log(data);
-  res.status(200).json("ok");
 });
 
 const wait = (timeToDelay) =>
@@ -186,30 +193,10 @@ const crawlProduct = async (url) => {
     const data = dom.window.runParams.data;
     const sku = data.commonModule.productId;
     const title = data.titleModule.subject;
-    let description = "";
     const linkDescription = data.descriptionModule.descriptionUrl;
     const htmlDescription = (await axios(linkDescription)).data;
     const $ = cheerio.load(htmlDescription);
-    const textP = $("p[class*='detail']");
-    const textSpan = $("span[style]");
-    if (textP.length > 0) {
-      for (let index = 0; index < textP.length; index++) {
-        const element = $(textP[index]);
-        let textPHtml = element.html();
-        description = description
-          .concat(textPHtml.slice(0).replace(/<br>/gm, "\n"))
-          .concat("\n");
-      }
-    }
-    if (textSpan.length > 0) {
-      for (let index = 0; index < textSpan.length; index++) {
-        const element = $(textSpan[index]);
-        let textSpanHtml = element.html();
-        description = description
-          .concat(textSpanHtml.slice(0).replace(/<br>/gm, "\n"))
-          .concat("\n");
-      }
-    }
+    let description = $("body").html() || "";
     const ortherImage = data.imageModule.imagePathList;
     const productSKUPropertyList = data.skuModule.productSKUPropertyList;
     const productSKUPriceList = data.skuModule.skuPriceList;
@@ -261,8 +248,7 @@ const crawlProduct = async (url) => {
       childrenSku,
     };
   } catch (error) {
-    console.log(error);
-    return null;
+    throw error;
   }
 };
 

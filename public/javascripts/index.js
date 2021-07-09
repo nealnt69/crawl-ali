@@ -36,7 +36,13 @@ $(".crawl-download").click(async function () {
         Name: formatName(product.title, store.length),
         Price: formatPrice(product.childrenSku[0].price, store.ship, store.num),
         Color: "",
-        Description: product.description,
+        Description: product.description
+          .replace(/<\s*script[^>]*>(.*?)<\s*\/\s*script>/, "")
+          .replace(/(\r\n|\n|\r)/gm, "")
+          .replace(/<br>/gi, "\n")
+          .replace(/<[^>]*>/gi, "")
+          .replace("&nbsp;", "")
+          .trim(),
         Type: "Parent",
         parent_sku: "",
         relationship_type: "",
@@ -58,7 +64,13 @@ $(".crawl-download").click(async function () {
         Name: formatName(product.title, store.length),
         Price: formatPrice(item.price, store.ship, store.num),
         Color: !item.type ? item.composeColor : "",
-        Description: product.description,
+        Description: product.description
+          .replace(/<\s*script[^>]*>(.*?)<\s*\/\s*script>/, "")
+          .replace(/(\r\n|\n|\r)/gm, "")
+          .replace(/<br>/gi, "\n")
+          .replace(/<[^>]*>/gi, "")
+          .replace("&nbsp;", "")
+          .trim(),
         Type: !item.type ? "Child" : "",
         parent_sku: !item.type ? `${store.prefix}-${product.sku}` : "",
         relationship_type: !item.type ? "Variation" : "",
