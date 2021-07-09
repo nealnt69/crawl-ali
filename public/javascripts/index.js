@@ -67,16 +67,17 @@ $(".crawl-download").click(async function () {
             /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
             ""
           )
+          .replace(/(\r\n|\n|\r)/gm, "")
           .replace(/<style([\s\S]*?)<\/style>/gi, "")
           .replace(/<script([\s\S]*?)<\/script>/gi, "")
           .replace(/<\/div>/gi, "\n")
           .replace(/<\/li>/gi, "\n")
           .replace(/<li>/gi, "  *  ")
           .replace(/<\/ul>/gi, "\n")
-          .replace(/(\r\n|\n|\r)/gm, "")
+          .replace(/<\/p>/gi, "\n")
+          .replace(/<br\s*[\/]?>/gi, "\n")
           .replace(/<br>/gi, "\n")
-          .replace(/<[^>]*>/gi, "")
-          .replace("&nbsp;", "")
+          .replace(/<[^>]+>/gi, "")
           .trim(),
         Type: "Parent",
         parent_sku: "",
