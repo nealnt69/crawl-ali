@@ -63,11 +63,16 @@ $(".crawl-download").click(async function () {
         Price: formatPrice(product.childrenSku[0].price, store.ship, store.num),
         Color: "",
         Description: product.description
-          .replace(/<\s*script[^>]*>(.*?)<\s*\/\s*script>/, "")
           .replace(
             /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
             ""
           )
+          .replace(/<style([\s\S]*?)<\/style>/gi, "")
+          .replace(/<script([\s\S]*?)<\/script>/gi, "")
+          .replace(/<\/div>/gi, "\n")
+          .replace(/<\/li>/gi, "\n")
+          .replace(/<li>/gi, "  *  ")
+          .replace(/<\/ul>/gi, "\n")
           .replace(/(\r\n|\n|\r)/gm, "")
           .replace(/<br>/gi, "\n")
           .replace(/<[^>]*>/gi, "")
