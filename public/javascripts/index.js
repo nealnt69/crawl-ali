@@ -8,6 +8,9 @@ const submit = document.getElementById("submit");
 
 submit.addEventListener("click", async () => {
   if (store.value && ship.value && num.value && prefix.value && length.value) {
+    submit.disabled = true;
+    submit.innerHTML = "Đang lấy dữ liệu, hãy đợi";
+    alert("Đang trong quá trình lấy dữ liệu, hãy đợi");
     const res = await axios.post("/crawl", {
       url: store.value,
       ship: ship.value,
@@ -29,15 +32,18 @@ $(".crawl-download").click(async function () {
   let data = [];
   filterProducts.forEach((product) => {
     if (!product.childrenSku[0].type) {
-      index++;
       data.push({
         Link: `https://www.aliexpress.com/item/${product.sku}.html`,
-        Id: `${store.prefix}-${index}-${product.sku}`,
+        Id: `${store.prefix}-${product.sku}`,
         Name: formatName(product.title, store.length),
         Price: formatPrice(product.childrenSku[0].price, store.ship, store.num),
         Color: "",
         Description: product.description
           .replace(/<\s*script[^>]*>(.*?)<\s*\/\s*script>/, "")
+          .replace(
+            /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
+            ""
+          )
           .replace(/(\r\n|\n|\r)/gm, "")
           .replace(/<br>/gi, "\n")
           .replace(/<[^>]*>/gi, "")
@@ -47,13 +53,13 @@ $(".crawl-download").click(async function () {
         parent_sku: "",
         relationship_type: "",
         variation_theme: "Color",
-        "Main Image": product.childrenSku[0].image || product.ortherImage[0],
-        "Other Image 1": product.ortherImage[0] || "",
-        "Other Image 2": product.ortherImage[1] || "",
-        "Other Image 3": product.ortherImage[2] || "",
-        "Other Image 4": product.ortherImage[3] || "",
-        "Other Image 5": product.ortherImage[4] || "",
-        "Other Image 6": product.ortherImage[5] || "",
+        "Main Image": "",
+        "Other Image 1": "",
+        "Other Image 2": "",
+        "Other Image 3": "",
+        "Other Image 4": "",
+        "Other Image 5": "",
+        "Other Image 6": "",
       });
     }
     product.childrenSku.forEach((item) => {
@@ -66,6 +72,10 @@ $(".crawl-download").click(async function () {
         Color: !item.type ? item.composeColor : "",
         Description: product.description
           .replace(/<\s*script[^>]*>(.*?)<\s*\/\s*script>/, "")
+          .replace(
+            /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
+            ""
+          )
           .replace(/(\r\n|\n|\r)/gm, "")
           .replace(/<br>/gi, "\n")
           .replace(/<[^>]*>/gi, "")
@@ -75,7 +85,10 @@ $(".crawl-download").click(async function () {
         parent_sku: !item.type ? `${store.prefix}-${product.sku}` : "",
         relationship_type: !item.type ? "Variation" : "",
         variation_theme: !item.type ? "Color" : "",
-        "Main Image": item.image || product.ortherImage[0],
+        "Main Image": (item.image || product.ortherImage[0]).replace(
+          "_640x640.jpg",
+          ""
+        ),
         "Other Image 1": product.ortherImage[0] || "",
         "Other Image 2": product.ortherImage[1] || "",
         "Other Image 3": product.ortherImage[2] || "",
@@ -99,7 +112,7 @@ $(".crawl-download").click(async function () {
   const blob = new Blob([wbout], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
   });
-  saveAs(blob, `Crawl-Ali-${moment().format("DD/MM/YYY")}.xlsx`);
+  saveAs(blob, `${store.prefix}.xlsx`);
 });
 
 const formatPrice = (price, ship, num) => {

@@ -11,9 +11,16 @@ const moment = require("moment");
 
 var router = express.Router();
 
+let isCrawling = false;
+
 router.get("/", async (req, res) => {
-  const listCrawl = await storeModel.find().sort({ created_at: -1 });
-  res.render("index", { title: "Crawl Ali", listCrawl, moment: moment });
+  const listCrawl = await storeModel.find().sort({ created_at: -1 }).limit(30);
+  res.render("index", {
+    title: "Crawl Ali",
+    listCrawl,
+    moment: moment,
+    isCrawling,
+  });
 });
 
 router.get("/download", async (req, res) => {
@@ -28,6 +35,7 @@ router.post("/crawl", async (req, res) => {
   const id = mongoose.Types.ObjectId();
   let listUrl = [];
   let detailProducts = [];
+  isCrawling = true;
   let stopLogin = 1;
   const browser = await puppeteer.launch({
     headless: true,
@@ -167,7 +175,7 @@ router.post("/crawl", async (req, res) => {
       }
     }
   }
-
+  isCrawling = false;
   console.log("done");
   await browser.close();
 });

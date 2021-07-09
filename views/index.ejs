@@ -31,7 +31,7 @@
         <div class="crawl-item">
           <a
             href="<%= crawl.url %>"
-            style="color: #fff; text-decoration: none; line-height: 24px"
+            style="text-decoration: none; line-height: 24px"
             target="_blank"
             class="crawl-store"
             ><%= crawl.url %></a
@@ -101,7 +101,13 @@
         <div class="cut cut-short"></div>
         <label for="length" class="placeholder">Độ dài tên</label>
       </div>
+      <% if (isCrawling) { %>
+      <button type="text" id="submit" disabled class="submit">
+        Đang lấy dữ liệu, hãy đợi
+      </button>
+      <% } %> <% if (!isCrawling) { %>
       <button type="text" id="submit" class="submit">Lấy dữ liệu</button>
+      <% } %>
     </div>
 
     <script src="/javascripts/index.js"></script>
