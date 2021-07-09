@@ -73,11 +73,11 @@ $(".crawl-download").click(async function () {
           .replace(/<\/div>/gi, "\n")
           .replace(/<div[^>]+>/gi, "\n")
           .replace(/<\/li>/gi, "\n")
-          .replace(/<li>/gi, "  *  ")
+          .replace(/<li[^>]+/gi, "\n")
           .replace(/<\/ul>/gi, "\n")
+          .replace(/<ul[^>]+/gi, "\n")
           .replace(/<\/p>/gi, "\n")
           .replace(/<p[^>]+>/gi, "\n")
-          .replace(/<br\s*[\/]?>/gi, "\n")
           .replace(/<br>/gi, "\n")
           .replace(/<[^>]+>/gi, "")
           .trim(),
