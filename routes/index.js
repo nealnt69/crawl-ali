@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 const storeModel = require("../db/schema/store");
 const productModel = require("../db/schema/product");
 const moment = require("moment");
+const XLSX = require("xlsx");
 
 var router = express.Router();
 
@@ -126,7 +127,7 @@ router.post("/crawl", async (req, res) => {
             await wait(5000);
             break;
           } else {
-            if (skip === 10) {
+            if (skip === 3) {
               subArrUrl = [];
             } else {
               subArrUrl = subArrUrl.slice(i + 1);
@@ -175,6 +176,142 @@ router.post("/crawl", async (req, res) => {
       }
     }
   }
+  isCrawling = false;
+  console.log("done");
+  await browser.close();
+});
+
+router.post("/crawl/excel", async (req, res) => {
+  const { ship, num, prefix, length } = req.query;
+  const workbook = XLSX.read(req.files.file.data);
+  const urlExcel = XLSX.utils
+    .sheet_to_json(workbook.Sheets[workbook.SheetNames[0]])
+    .map((url) => url[Object.keys(url)[0]]);
+  const id = mongoose.Types.ObjectId();
+  isCrawling = true;
+  let stopLogin = 1;
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    slowMo: 1,
+  });
+
+  const page = await browser.newPage();
+  await page.goto(
+    `https://trade.aliexpress.com/order_detail.htm?orderId=9999`,
+    {
+      waitUntil: "domcontentloaded",
+    }
+  );
+  while (stopLogin > 0) {
+    await page.click("#fm-login-id");
+    await page.type("#fm-login-id", "namnt691997@gmail.com");
+    await page.click("#fm-login-password");
+    await page.waitForTimeout(3000);
+    let checkCode = await page.$eval(
+      ".fm-checkcode",
+      (el) => el?.style?.display || ""
+    );
+    if (checkCode === "block") {
+      await page.reload();
+    } else {
+      stopLogin = 0;
+    }
+  }
+  await page.type("#fm-login-password", "namnguyen691997");
+  await page.click("button[type='submit']");
+  await page.waitForNavigation();
+  res.status(200).json();
+  let convertListUrl = urlExcel.map(
+    (item) =>
+      "https://aliexpress" +
+      item.split("aliexpress")[item.split("aliexpress").length - 1]
+  );
+  const subArrCount = Math.ceil(convertListUrl.length / 2);
+
+  let subArrUrl = [];
+
+  for (let i = 1; i <= subArrCount; i++) {
+    subArrUrl.push(convertListUrl.slice(2 * (i - 1), 2 * i));
+  }
+  let skip = 0;
+  let currentPage = 1;
+  let detailProducts = [];
+
+  while (subArrUrl.length > 0) {
+    for (let i = 0; i < subArrUrl.length; i++) {
+      const urls = subArrUrl[i];
+      try {
+        const products = await Promise.all(
+          urls.map((url) => crawlProduct(url))
+        );
+        if (!products) {
+          console.log(products);
+        }
+        console.log(i);
+        skip = 0;
+        detailProducts = [...detailProducts, ...products];
+        if (i % 15 === 0 && i > 0) {
+          currentPage++;
+          await storeModel.updateOne(
+            { _id: id },
+            {
+              url: "link",
+              page: currentPage,
+              ship,
+              num,
+              prefix,
+              length,
+            },
+            { upsert: true }
+          );
+          await productModel.insertMany(
+            detailProducts.map((product) => ({ ...product, store: id }))
+          );
+          detailProducts = [];
+
+          await wait(10000);
+        }
+        if (i === subArrUrl.length - 1) {
+          subArrUrl = [];
+        }
+      } catch (error) {
+        if (skip === 0) {
+          console.log(error?.config?.url);
+          subArrUrl = subArrUrl.slice(i);
+          skip++;
+          await wait(5000);
+          break;
+        } else {
+          if (skip === 3) {
+            subArrUrl = [];
+          } else {
+            subArrUrl = subArrUrl.slice(i + 1);
+          }
+          await wait(5000);
+          break;
+        }
+      }
+    }
+  }
+  if (detailProducts.length > 0) {
+    await storeModel.updateOne(
+      { _id: id },
+      {
+        url: "link",
+        page: currentPage,
+        ship,
+        num,
+        prefix,
+        length,
+      },
+      { upsert: true }
+    );
+    await productModel.insertMany(
+      detailProducts.map((product) => ({ ...product, store: id }))
+    );
+  }
+
   isCrawling = false;
   console.log("done");
   await browser.close();

@@ -98,7 +98,7 @@ ul {
   border-radius: 12px;
   border: 0;
   box-sizing: border-box;
-  color: #eee;
+  color: #000;
   font-size: 18px;
   height: 100%;
   outline: 0;
@@ -157,11 +157,11 @@ ul {
   box-sizing: border-box;
   color: #eee;
   cursor: pointer;
-  font-size: 18px;
-  height: 50px;
+  height: 40px;
   outline: 0;
   text-align: center;
   width: 100%;
+  font-weight: 600;
 }
 
 .submit:active {
@@ -170,4 +170,20 @@ ul {
 
 .submit[disabled] {
   background-color: red;
+}
+
+#lable-file {
+  background-color: indigo;
+  color: white;
+  padding: 0.5rem 16px;
+  font-family: sans-serif;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  font-weight: 600;
+}
+
+#file-chosen {
+  margin-left: 0.5rem;
+  font-family: sans-serif;
 }

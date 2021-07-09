@@ -6,18 +6,42 @@ const length = document.getElementById("length");
 
 const submit = document.getElementById("submit");
 
+const actualBtn = document.getElementById("actual-btn");
+
+const fileChosen = document.getElementById("file-chosen");
+
+actualBtn.addEventListener("change", function () {
+  fileChosen.textContent = this.files[0].name;
+});
+
 submit.addEventListener("click", async () => {
   if (store.value && ship.value && num.value && prefix.value && length.value) {
     submit.disabled = true;
     submit.innerHTML = "Đang lấy dữ liệu, hãy đợi";
     alert("Đang trong quá trình lấy dữ liệu, hãy đợi");
-    const res = await axios.post("/crawl", {
-      url: store.value,
-      ship: ship.value,
-      num: num.value,
-      prefix: prefix.value,
-      length: length.value,
-    });
+    if (actualBtn.files[0]) {
+      const formData = new FormData();
+      formData.append("file", actualBtn.files[0]);
+      actualBtn.value = null;
+      fileChosen.textContent = "";
+      const res = await axios.post(
+        `/crawl/excel?ship=${ship.value}&num=${num.value}&prefix=${prefix.value}&length=${length.value}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+    } else {
+      const res = await axios.post("/crawl", {
+        url: store.value,
+        ship: ship.value,
+        num: num.value,
+        prefix: prefix.value,
+        length: length.value,
+      });
+    }
   } else {
     alert("Hãy nhập hết thông tin");
   }
