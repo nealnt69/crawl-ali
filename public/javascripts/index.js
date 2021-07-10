@@ -60,7 +60,7 @@ $(".crawl-download").click(async function () {
         Link: `https://www.aliexpress.com/item/${product.sku}.html`,
         Id: `${store.prefix}-${product.sku}`,
         Name: formatName(product.title, store.length),
-        Price: formatPrice(product.childrenSku[0].price, store.ship, store.num),
+        Price: "",
         Color: "",
         Description: product.description
           .replace(
@@ -156,7 +156,9 @@ $(".crawl-download").click(async function () {
 });
 
 const formatPrice = (price, ship, num) => {
-  return Math.ceil((price.replaceAll(",", "") * 1 + ship * 1) * num * 1) - 0.01;
+  return (
+    Math.ceil((price.replaceAll(",", "") * 1 + ship * 1) / (num * 1)) - 0.01
+  );
 };
 
 const formatName = (name, length) => {

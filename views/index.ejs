@@ -25,26 +25,6 @@
     ></script>
   </head>
   <body>
-    <div class="list-crawl">
-      <ul>
-        <% listCrawl.forEach(function(crawl){ %>
-        <div class="crawl-item">
-          <a
-            href="<%= crawl.url %>"
-            style="text-decoration: none; line-height: 24px"
-            target="_blank"
-            class="crawl-store"
-            ><%= crawl.url %></a
-          >
-          <div class="crawl-page">Số trang <%= crawl.page %></div>
-          <div class="crawl-date">
-            Ngày lấy <%= moment(crawl.created_at).format("DD/MM/YYYY") %>
-          </div>
-          <div class="crawl-download" id="<%= crawl._id %>">Tải xuống</div>
-        </div>
-        <% }); %>
-      </ul>
-    </div>
     <div class="form">
       <div class="input-container ic1">
         <input
@@ -57,8 +37,8 @@
         <div class="cut"></div>
         <label for="store" class="placeholder">Cửa hàng</label>
       </div>
-      <div style="margin-bottom: 40px;">
-        <input type="file" id="actual-btn"  accept=".xlsx, .xls," hidden />
+      <div style="margin-bottom: 40px">
+        <input type="file" id="actual-btn" accept=".xlsx, .xls," hidden />
         <label id="lable-file" for="actual-btn">Chọn file Excel</label>
         <span id="file-chosen">Không có file nào được chọn</span>
       </div>
@@ -113,6 +93,32 @@
       <% } %> <% if (!isCrawling) { %>
       <button type="text" id="submit" class="submit">Lấy dữ liệu</button>
       <% } %>
+    </div>
+    <div class="content-right">
+      <div class="menu">
+        <div id="progress" class="menu-item">Xem tiến độ</div>
+        <div id="history" class="menu-item">Lịch sử tìm kiếm</div>
+      </div>
+      <div class="list-crawl">
+        <ul>
+          <% listCrawl.forEach(function(crawl){ %>
+          <div class="crawl-item">
+            <a
+              href="<%= crawl.url %>"
+              style="text-decoration: none; line-height: 24px"
+              target="_blank"
+              class="crawl-store"
+              ><%= crawl.url %></a
+            >
+            <div class="crawl-page">Số trang <%= crawl.page %></div>
+            <div class="crawl-date">
+              Ngày lấy <%= moment(crawl.created_at).format("DD/MM/YYYY") %>
+            </div>
+            <div class="crawl-download" id="<%= crawl._id %>">Tải xuống</div>
+          </div>
+          <% }); %>
+        </ul>
+      </div>
     </div>
 
     <script src="/javascripts/index.js"></script>

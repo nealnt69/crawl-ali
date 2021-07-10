@@ -13,8 +13,9 @@ body {
 }
 
 .list-crawl {
-  width: 50%;
+  width: 100%;
   color: #fff;
+  display: none;
   padding: 0px 32px;
 }
 
@@ -52,6 +53,36 @@ ul {
 
 .crawl-date {
   margin-left: 16px;
+}
+
+.content-right {
+  width: 50%;
+  margin-left: 32px;
+}
+
+.menu {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  padding: 16px 32px;
+  border-radius: 20px;
+}
+
+.menu-item {
+  margin-right: 16px;
+  border-radius: 5px;
+  padding: 8px 16px;
+  cursor: pointer;
+  color: #fff;
+}
+
+#progress {
+  background-color: #0fca1d;
+}
+
+#history {
+  background-color: #ff6a00;
 }
 
 .form {
