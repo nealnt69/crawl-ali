@@ -16,7 +16,7 @@ body {
   width: 100%;
   color: #fff;
   display: none;
-  padding: 0px 32px;
+  margin: 16px 0px;
 }
 
 ul {
@@ -67,6 +67,7 @@ ul {
   background-color: #fff;
   padding: 16px 32px;
   border-radius: 20px;
+  box-sizing: border-box;
 }
 
 .menu-item {
@@ -111,17 +112,17 @@ ul {
 }
 
 .input-container {
-  height: 50px;
+  height: 40px;
   position: relative;
   width: 100%;
 }
 
 .ic1 {
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 .ic2 {
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 .input {
@@ -130,33 +131,14 @@ ul {
   border: 0;
   box-sizing: border-box;
   color: #000;
-  font-size: 18px;
+  font-size: 16px;
   height: 100%;
   outline: 0;
   padding: 4px 20px 0;
   width: 100%;
 }
 
-.cut {
-  background-color: #fff;
-  border-radius: 10px;
-  height: 20px;
-  left: 20px;
-  position: absolute;
-  top: -20px;
-  transform: translateY(0);
-  transition: transform 200ms;
-}
-
-.cut-short {
-}
-
-.input:focus ~ .cut,
-.input:not(:placeholder-shown) ~ .cut {
-  background-color: transparent;
-}
-
-.placeholder {
+/* .placeholder {
   color: #65657b;
   font-family: sans-serif;
   left: 20px;
@@ -164,22 +146,8 @@ ul {
   pointer-events: none;
   position: absolute;
   transform-origin: 0 50%;
-  transition: transform 200ms, color 200ms;
-  top: 20px;
-}
-
-.input:focus ~ .placeholder,
-.input:not(:placeholder-shown) ~ .placeholder {
-  transform: translateY(-30px) translateX(10px) scale(0.75);
-}
-
-.input:not(:placeholder-shown) ~ .placeholder {
-  color: #808097;
-}
-
-.input:focus ~ .placeholder {
-  color: #000;
-}
+  top: 10px;
+} */
 
 .submit {
   background-color: #08d;
@@ -217,4 +185,36 @@ ul {
 #file-chosen {
   margin-left: 0.5rem;
   font-family: sans-serif;
+}
+
+#modal-progress {
+  position: fixed;
+  z-index: 2;
+  width: 100vw;
+  height: 100vh;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background-color: #00000036;
+  top: 0;
+  left: 0;
+}
+
+#modal-progress div {
+  background-color: #fff;
+  padding: 32px;
+  border-radius: 10px;
+  position: relative;
+}
+
+#modal-progress span {
+  font-weight: 600;
+}
+
+.close {
+  position: absolute;
+  right: 15px;
+  top: 10px;
+  cursor: pointer;
+  font-weight: 400 !important;
 }

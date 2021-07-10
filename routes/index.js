@@ -9,6 +9,15 @@ const storeModel = require("../db/schema/store");
 const productModel = require("../db/schema/product");
 const moment = require("moment");
 const XLSX = require("xlsx");
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "vietanhcrawlali@gmail.com",
+    pass: "namnguyen691997",
+  },
+});
 
 var router = express.Router();
 
@@ -32,7 +41,7 @@ router.get("/download", async (req, res) => {
 });
 
 router.post("/crawl", async (req, res) => {
-  const { url, ship, num, prefix, length } = req.body;
+  const { url, ship, num, prefix, length, mail } = req.body;
   const id = mongoose.Types.ObjectId();
   let listUrl = [];
   let detailProducts = [];
@@ -69,10 +78,16 @@ router.post("/crawl", async (req, res) => {
   await page.type("#fm-login-password", "namnguyen691997");
   await page.click("button[type='submit']");
   await page.waitForNavigation();
-  res.status(200).json();
   await page.goto(url, {
     waitUntil: "domcontentloaded",
   });
+  let totalProduct = await page.evaluate(() =>
+    parseInt(
+      document.querySelector(".result-info").innerText.replace(/^\D+/g, "")
+    )
+  );
+  res.status(200).json({ total: totalProduct, store: id });
+
   let stop = 0;
   let index = 1;
   while (stop < 1) {
@@ -147,6 +162,7 @@ router.post("/crawl", async (req, res) => {
         num,
         prefix,
         length,
+        total: totalProduct,
       },
       { upsert: true }
     );
@@ -178,11 +194,139 @@ router.post("/crawl", async (req, res) => {
   }
   isCrawling = false;
   console.log("done");
+
+  if (mail) {
+    const products = await productModel.find({
+      store: id,
+    });
+    const store = await storeModel.findById(id);
+    const filterProducts = products.filter((pro) => pro.childrenSku.length > 0);
+    let index = 0;
+    let data = [];
+    filterProducts.forEach((product) => {
+      if (!product.childrenSku[0].type) {
+        data.push({
+          Link: `https://www.aliexpress.com/item/${product.sku}.html`,
+          Id: `${store.prefix}-${product.sku}`,
+          Name: formatName(product.title, store.length),
+          Price: "",
+          Color: "",
+          Description: product.description
+            .replace(
+              /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
+              ""
+            )
+            .replace(/(\r\n|\n|\r)/gm, "")
+            .replace(/<style([\s\S]*?)<\/style>/gi, "")
+            .replace(/<script([\s\S]*?)<\/script>/gi, "")
+            .replace(/<\/div>/gi, "\n")
+            .replace(/<div[^>]*>/gi, "\n")
+            .replace(/<\/li>/gi, "\n")
+            .replace(/<li[^>]*/gi, "\n")
+            .replace(/<\/ul>/gi, "\n")
+            .replace(/<ul[^>]*/gi, "\n")
+            .replace(/<\/p>/gi, "\n")
+            .replace(/<p[^>]*>/gi, "\n")
+            .replace(/<br>/gi, "\n")
+            .replace(/<[^>]*>/gi, "")
+            .trim(),
+          Type: "Parent",
+          parent_sku: "",
+          relationship_type: "",
+          variation_theme: "Color",
+          "Main Image": "",
+          "Other Image 1": "",
+          "Other Image 2": "",
+          "Other Image 3": "",
+          "Other Image 4": "",
+          "Other Image 5": "",
+          "Other Image 6": "",
+        });
+      }
+      product.childrenSku.forEach((item) => {
+        index++;
+        data.push({
+          Link: `https://www.aliexpress.com/item/${product.sku}.html`,
+          Id: `${store.prefix}-${index}-${product.sku}`,
+          Name: formatName(product.title, store.length),
+          Price: formatPrice(item.price, store.ship, store.num),
+          Color: !item.type ? item.composeColor : "",
+          Description: product.description
+            .replace(
+              /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
+              ""
+            )
+            .replace(/(\r\n|\n|\r)/gm, "")
+            .replace(/<style([\s\S]*?)<\/style>/gi, "")
+            .replace(/<script([\s\S]*?)<\/script>/gi, "")
+            .replace(/<\/div>/gi, "\n")
+            .replace(/<div[^>]*>/gi, "\n")
+            .replace(/<\/li>/gi, "\n")
+            .replace(/<li[^>]*/gi, "\n")
+            .replace(/<\/ul>/gi, "\n")
+            .replace(/<ul[^>]*/gi, "\n")
+            .replace(/<\/p>/gi, "\n")
+            .replace(/<p[^>]*>/gi, "\n")
+            .replace(/<br>/gi, "\n")
+            .replace(/<[^>]*>/gi, "")
+            .trim(),
+          Type: !item.type ? "Child" : "",
+          parent_sku: !item.type ? `${store.prefix}-${product.sku}` : "",
+          relationship_type: !item.type ? "Variation" : "",
+          variation_theme: !item.type ? "Color" : "",
+          "Main Image": (item.image || product.ortherImage[0]).replace(
+            "_640x640.jpg",
+            ""
+          ),
+          "Other Image 1": product.ortherImage[0] || "",
+          "Other Image 2": product.ortherImage[1] || "",
+          "Other Image 3": product.ortherImage[2] || "",
+          "Other Image 4": product.ortherImage[3] || "",
+          "Other Image 5": product.ortherImage[4] || "",
+          "Other Image 6": product.ortherImage[5] || "",
+        });
+      });
+    });
+    var wb = XLSX.utils.book_new();
+
+    wb.SheetNames.push("Ali");
+
+    var ws = XLSX.utils.json_to_sheet(data);
+
+    wb.Sheets["Ali"] = ws;
+
+    var wbout = XLSX.write(wb, {
+      type: "buffer",
+      bookType: "xlsx",
+      bookSST: false,
+    });
+    transporter.sendMail(
+      {
+        from: "vietanhcrawlali@gmail.com",
+        to: mail,
+        subject: "Lấy dữ liệu Aliexpress thành công",
+        text: "Đã lấy dữ liệu thành công, hãy tải tệp excel để xem chi tiết",
+        attachments: [
+          {
+            filename: prefix + ".xlsx",
+            content: wbout,
+          },
+        ],
+      },
+      (err, success) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("gửi mail thành công");
+        }
+      }
+    );
+  }
   await browser.close();
 });
 
 router.post("/crawl/excel", async (req, res) => {
-  const { ship, num, prefix, length } = req.query;
+  const { ship, num, prefix, length, mail } = req.query;
   const workbook = XLSX.read(req.files.file.data);
   const urlExcel = XLSX.utils
     .sheet_to_json(workbook.Sheets[workbook.SheetNames[0]])
@@ -221,7 +365,8 @@ router.post("/crawl/excel", async (req, res) => {
   await page.type("#fm-login-password", "namnguyen691997");
   await page.click("button[type='submit']");
   await page.waitForNavigation();
-  res.status(200).json();
+  res.status(200).json({ total: urlExcel?.length || 0, store: id });
+
   let convertListUrl = urlExcel.map(
     (item) =>
       "https://aliexpress" +
@@ -262,6 +407,7 @@ router.post("/crawl/excel", async (req, res) => {
               num,
               prefix,
               length,
+              total: urlExcel?.length || 0,
             },
             { upsert: true }
           );
@@ -304,6 +450,7 @@ router.post("/crawl/excel", async (req, res) => {
         num,
         prefix,
         length,
+        total: urlExcel?.length || 0,
       },
       { upsert: true }
     );
@@ -314,7 +461,142 @@ router.post("/crawl/excel", async (req, res) => {
 
   isCrawling = false;
   console.log("done");
+  if (mail) {
+    const products = await productModel.find({
+      store: id,
+    });
+    const store = await storeModel.findById(id);
+    const filterProducts = products.filter((pro) => pro.childrenSku.length > 0);
+    let index = 0;
+    let data = [];
+    filterProducts.forEach((product) => {
+      if (!product.childrenSku[0].type) {
+        data.push({
+          Link: `https://www.aliexpress.com/item/${product.sku}.html`,
+          Id: `${store.prefix}-${product.sku}`,
+          Name: formatName(product.title, store.length),
+          Price: "",
+          Color: "",
+          Description: product.description
+            .replace(
+              /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
+              ""
+            )
+            .replace(/(\r\n|\n|\r)/gm, "")
+            .replace(/<style([\s\S]*?)<\/style>/gi, "")
+            .replace(/<script([\s\S]*?)<\/script>/gi, "")
+            .replace(/<\/div>/gi, "\n")
+            .replace(/<div[^>]*>/gi, "\n")
+            .replace(/<\/li>/gi, "\n")
+            .replace(/<li[^>]*/gi, "\n")
+            .replace(/<\/ul>/gi, "\n")
+            .replace(/<ul[^>]*/gi, "\n")
+            .replace(/<\/p>/gi, "\n")
+            .replace(/<p[^>]*>/gi, "\n")
+            .replace(/<br>/gi, "\n")
+            .replace(/<[^>]*>/gi, "")
+            .trim(),
+          Type: "Parent",
+          parent_sku: "",
+          relationship_type: "",
+          variation_theme: "Color",
+          "Main Image": "",
+          "Other Image 1": "",
+          "Other Image 2": "",
+          "Other Image 3": "",
+          "Other Image 4": "",
+          "Other Image 5": "",
+          "Other Image 6": "",
+        });
+      }
+      product.childrenSku.forEach((item) => {
+        index++;
+        data.push({
+          Link: `https://www.aliexpress.com/item/${product.sku}.html`,
+          Id: `${store.prefix}-${index}-${product.sku}`,
+          Name: formatName(product.title, store.length),
+          Price: formatPrice(item.price, store.ship, store.num),
+          Color: !item.type ? item.composeColor : "",
+          Description: product.description
+            .replace(
+              /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
+              ""
+            )
+            .replace(/(\r\n|\n|\r)/gm, "")
+            .replace(/<style([\s\S]*?)<\/style>/gi, "")
+            .replace(/<script([\s\S]*?)<\/script>/gi, "")
+            .replace(/<\/div>/gi, "\n")
+            .replace(/<div[^>]*>/gi, "\n")
+            .replace(/<\/li>/gi, "\n")
+            .replace(/<li[^>]*/gi, "\n")
+            .replace(/<\/ul>/gi, "\n")
+            .replace(/<ul[^>]*/gi, "\n")
+            .replace(/<\/p>/gi, "\n")
+            .replace(/<p[^>]*>/gi, "\n")
+            .replace(/<br>/gi, "\n")
+            .replace(/<[^>]*>/gi, "")
+            .trim(),
+          Type: !item.type ? "Child" : "",
+          parent_sku: !item.type ? `${store.prefix}-${product.sku}` : "",
+          relationship_type: !item.type ? "Variation" : "",
+          variation_theme: !item.type ? "Color" : "",
+          "Main Image": (item.image || product.ortherImage[0]).replace(
+            "_640x640.jpg",
+            ""
+          ),
+          "Other Image 1": product.ortherImage[0] || "",
+          "Other Image 2": product.ortherImage[1] || "",
+          "Other Image 3": product.ortherImage[2] || "",
+          "Other Image 4": product.ortherImage[3] || "",
+          "Other Image 5": product.ortherImage[4] || "",
+          "Other Image 6": product.ortherImage[5] || "",
+        });
+      });
+    });
+    var wb = XLSX.utils.book_new();
+
+    wb.SheetNames.push("Ali");
+
+    var ws = XLSX.utils.json_to_sheet(data);
+
+    wb.Sheets["Ali"] = ws;
+
+    var wbout = XLSX.write(wb, {
+      type: "buffer",
+      bookType: "xlsx",
+      bookSST: false,
+    });
+    transporter.sendMail(
+      {
+        from: "vietanhcrawlali@gmail.com",
+        to: mail,
+        subject: "Lấy dữ liệu Aliexpress thành công",
+        text: "Đã lấy dữ liệu thành công, hãy tải tệp excel để xem chi tiết",
+        attachments: [
+          {
+            filename: prefix + ".xlsx",
+            content: wbout,
+          },
+        ],
+      },
+      (err, success) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("gửi mail thành công");
+        }
+      }
+    );
+  }
   await browser.close();
+});
+
+router.get("/crawl", async (req, res) => {
+  const store = req.query.store;
+  const count = await productModel.countDocuments({
+    store,
+  });
+  res.status(200).json({ count });
 });
 
 router.get("/single", async (req, res) => {
@@ -558,5 +840,19 @@ async function autoScroll(page) {
     });
   });
 }
+
+const formatPrice = (price, ship, num) => {
+  return Math.ceil((price.replace(",", "") * 1 + ship * 1) / (num * 1)) - 0.01;
+};
+
+const formatName = (name, length) => {
+  if (name.length <= length) {
+    return name;
+  } else if (name.charAt(length) == " ") {
+    return name.slice(0, length);
+  } else {
+    return name.slice(0, length).split(" ").slice(0, -1).join(" ");
+  }
+};
 
 module.exports = router;

@@ -9,6 +9,7 @@ const schema = new Schema(
     num: Number,
     prefix: String,
     length: Number,
+    total: Number,
   },
   { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );

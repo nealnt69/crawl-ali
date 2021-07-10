@@ -19,6 +19,7 @@
     "moment": "^2.29.1",
     "mongoose": "^5.13.2",
     "morgan": "~1.9.1",
+    "nodemailer": "^6.6.2",
     "nodemon": "^2.0.9",
     "puppeteer": "^10.1.0",
     "vm": "^0.1.0",

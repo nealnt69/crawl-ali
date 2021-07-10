@@ -3,6 +3,7 @@ const ship = document.getElementById("ship");
 const num = document.getElementById("num");
 const prefix = document.getElementById("prefix");
 const length = document.getElementById("length");
+const mail = document.getElementById("mail");
 
 const submit = document.getElementById("submit");
 
@@ -14,18 +15,35 @@ actualBtn.addEventListener("change", function () {
   fileChosen.textContent = this.files[0].name;
 });
 
+let getValueInterval;
+
+$("#progress").click(() => {
+  if ($("#submit").attr("disabled")) {
+    getNumberCrawl();
+  }
+});
+$("#history").click(() => {
+  $(".list-crawl").toggle();
+});
+
+$(".close").click(() => {
+  $("#modal-progress").css("display", "none");
+});
+
 submit.addEventListener("click", async () => {
   if (store.value && ship.value && num.value && prefix.value && length.value) {
+    $("#modal-progress").css("display", "flex");
+    $(".modal-progress-current").text("0");
+    $(".modal-progress-total").text("0");
     submit.disabled = true;
     submit.innerHTML = "Đang lấy dữ liệu, hãy đợi";
-    alert("Đang trong quá trình lấy dữ liệu, hãy đợi");
     if (actualBtn.files[0]) {
       const formData = new FormData();
       formData.append("file", actualBtn.files[0]);
       actualBtn.value = null;
       fileChosen.textContent = "";
       const res = await axios.post(
-        `/crawl/excel?ship=${ship.value}&num=${num.value}&prefix=${prefix.value}&length=${length.value}`,
+        `/crawl/excel?ship=${ship.value}&num=${num.value}&prefix=${prefix.value}&length=${length.value}&mail=${mail.value}`,
         formData,
         {
           headers: {
@@ -33,6 +51,10 @@ submit.addEventListener("click", async () => {
           },
         }
       );
+      localStorage.setItem("crawl", JSON.stringify(res.data));
+      $("#modal-progress").css("display", "flex");
+      $(".modal-progress-current").text("0");
+      $(".modal-progress-total").text(res.data.total);
     } else {
       const res = await axios.post("/crawl", {
         url: store.value,
@@ -40,8 +62,14 @@ submit.addEventListener("click", async () => {
         num: num.value,
         prefix: prefix.value,
         length: length.value,
+        mail: mail.value,
       });
+      localStorage.setItem("crawl", JSON.stringify(res.data));
+      $("#modal-progress").css("display", "flex");
+      $(".modal-progress-current").text("0");
+      $(".modal-progress-total").text(res.data.total);
     }
+    getNumberCrawl();
   } else {
     alert("Hãy nhập hết thông tin");
   }
@@ -169,4 +197,31 @@ const formatName = (name, length) => {
   } else {
     return name.slice(0, length).split(" ").slice(0, -1).join(" ");
   }
+};
+
+const getNumberCrawl = async () => {
+  const res = await axios(
+    `/crawl?store=${JSON.parse(localStorage.getItem("crawl")).store}`
+  );
+  if (res.data.count >= JSON.parse(localStorage.getItem("crawl")).total) {
+    clearInterval(getValueInterval);
+  }
+  $("#modal-progress").css("display", "flex");
+  $(".modal-progress-current").text(res.data.count);
+  $(".modal-progress-total").text(
+    JSON.parse(localStorage.getItem("crawl")).total
+  );
+  getValueInterval = setInterval(async () => {
+    const res = await axios(
+      `/crawl?store=${JSON.parse(localStorage.getItem("crawl")).store}`
+    );
+    if (res.data.count >= JSON.parse(localStorage.getItem("crawl")).total) {
+      clearInterval(getValueInterval);
+    }
+    $("#modal-progress").css("display", "flex");
+    $(".modal-progress-current").text(res.data.count);
+    $(".modal-progress-total").text(
+      JSON.parse(localStorage.getItem("crawl")).total
+    );
+  }, 20000);
 };

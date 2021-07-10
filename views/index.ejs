@@ -25,6 +25,13 @@
     ></script>
   </head>
   <body>
+    <div id="modal-progress">
+      <div>
+        Tiến độ hiện tại: <span class="modal-progress-current">0</span> /
+        <span class="modal-progress-total">0</span> sản phẩm
+        <span class="close">X</span>
+      </div>
+    </div>
     <div class="form">
       <div class="input-container ic1">
         <input
@@ -32,10 +39,8 @@
           class="input"
           type="text"
           autocomplete="chrome-off"
-          placeholder=" "
+          placeholder="Link Store"
         />
-        <div class="cut"></div>
-        <label for="store" class="placeholder">Cửa hàng</label>
       </div>
       <div style="margin-bottom: 40px">
         <input type="file" id="actual-btn" accept=".xlsx, .xls," hidden />
@@ -48,10 +53,8 @@
           class="input"
           type="text"
           autocomplete="chrome-off"
-          placeholder=" "
+          placeholder="Shipping Price"
         />
-        <div class="cut"></div>
-        <label for="ship" class="placeholder">Giá Ship</label>
       </div>
       <div class="input-container ic2">
         <input
@@ -59,10 +62,8 @@
           class="input"
           type="text"
           autocomplete="chrome-off"
-          placeholder=" "
+          placeholder="Hệ số lãi"
         />
-        <div class="cut cut-short"></div>
-        <label for="num" class="placeholder">Hệ số</label>
       </div>
       <div class="input-container ic2">
         <input
@@ -70,10 +71,8 @@
           class="input"
           type="text"
           autocomplete="chrome-off"
-          placeholder=" "
+          placeholder="Prefix"
         />
-        <div class="cut cut-short"></div>
-        <label for="prefix" class="placeholder">Tiền tố</label>
       </div>
       <div class="input-container ic2">
         <input
@@ -81,10 +80,17 @@
           class="input"
           type="text"
           autocomplete="chrome-off"
-          placeholder=" "
+          placeholder="Độ dài Tiêu đề"
         />
-        <div class="cut cut-short"></div>
-        <label for="length" class="placeholder">Độ dài tên</label>
+      </div>
+      <div class="input-container ic2">
+        <input
+          id="mail"
+          class="input"
+          type="text"
+          autocomplete="chrome-off"
+          placeholder="Email nhận thông báo"
+        />
       </div>
       <% if (isCrawling) { %>
       <button type="text" id="submit" disabled class="submit">
