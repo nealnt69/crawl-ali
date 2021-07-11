@@ -110,11 +110,11 @@
           <% listCrawl.forEach(function(crawl){ %>
           <div class="crawl-item">
             <a
-              href="<%= crawl.url %>"
+              href="<%= crawl.url ==='link'? '#' : crawl.url %>"
+              target="<%= crawl.url ==='link'? '_self' : '_blank' %>"
               style="text-decoration: none; line-height: 24px"
-              target="_blank"
               class="crawl-store"
-              ><%= crawl.url %></a
+              ><%= crawl.url ==="link"? crawl.prefix : crawl.url  %></a
             >
             <div class="crawl-page">Số trang <%= crawl.page %></div>
             <div class="crawl-date">
