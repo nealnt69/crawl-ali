@@ -129,7 +129,7 @@ $(".crawl-download").click(async function () {
         Id: `${store.prefix}-${index}-${product.sku}`,
         Name: formatName(product.title, store.length),
         Price: formatPrice(item.price, store.ship, store.num),
-        Color: !item.type ? item.composeColor.replace(" ", "-") : "",
+        Color: !item.type ? item.composeColor : "",
         Description: product.description
           .replace(
             /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,

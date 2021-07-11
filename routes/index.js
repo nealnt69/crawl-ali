@@ -250,7 +250,7 @@ router.post("/crawl", async (req, res) => {
           Id: `${store.prefix}-${index}-${product.sku}`,
           Name: formatName(product.title, store.length),
           Price: formatPrice(item.price, store.ship, store.num),
-          Color: !item.type ? item.composeColor.replace(" ", "-") : "",
+          Color: !item.type ? item.composeColor : "",
           Description: product.description
             .replace(
               /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
@@ -516,7 +516,7 @@ router.post("/crawl/excel", async (req, res) => {
           Id: `${store.prefix}-${index}-${product.sku}`,
           Name: formatName(product.title, store.length),
           Price: formatPrice(item.price, store.ship, store.num),
-          Color: !item.type ? item.composeColor.replace(" ", "-") : "",
+          Color: !item.type ? item.composeColor : "",
           Description: product.description
             .replace(
               /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
@@ -722,7 +722,7 @@ const getChildreFromTwoSku = (productSKUPropertyList, productSKUPriceList) => {
         [proName2]: element2.propertyValueDisplayName,
         composeColor:
           element1.propertyValueDisplayName +
-          " " +
+          "-" +
           element2.propertyValueDisplayName,
         proIds: `${element1.propertyValueIdLong},${element2.propertyValueIdLong}`,
         image: element1.skuPropertyImagePath || element2.skuPropertyImagePath,
@@ -773,9 +773,9 @@ const getChildreFromThreeSku = (
           [proName3]: element3.propertyValueDisplayName,
           composeColor:
             element1.propertyValueDisplayName +
-            " " +
+            "-" +
             element2.propertyValueDisplayName +
-            " " +
+            "-" +
             element3.propertyValueDisplayName,
 
           proIds: `${element1.propertyValueIdLong},${element2.propertyValueIdLong},${element3.propertyValueIdLong}`,
