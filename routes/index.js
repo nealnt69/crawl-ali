@@ -250,7 +250,7 @@ router.post("/crawl", async (req, res) => {
           Id: `${store.prefix}-${index}-${product.sku}`,
           Name: formatName(product.title, store.length),
           Price: formatPrice(item.price, store.ship, store.num),
-          Color: !item.type ? item.composeColor : "",
+          Color: !item.type ? item.composeColor.replace(" ", "-") : "",
           Description: product.description
             .replace(
               /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
@@ -516,7 +516,7 @@ router.post("/crawl/excel", async (req, res) => {
           Id: `${store.prefix}-${index}-${product.sku}`,
           Name: formatName(product.title, store.length),
           Price: formatPrice(item.price, store.ship, store.num),
-          Color: !item.type ? item.composeColor : "",
+          Color: !item.type ? item.composeColor.replace(" ", "-") : "",
           Description: product.description
             .replace(
               /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
