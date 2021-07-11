@@ -185,7 +185,8 @@ $(".crawl-download").click(async function () {
 
 const formatPrice = (price, ship, num) => {
   return (
-    Math.ceil((price.replaceAll(",", "") * 1 + ship * 1) / (num * 1)) - 0.01
+    Math.ceil(((price.replaceAll(",", "") * 1 + ship * 1) * (num * 1)) / 0.85) -
+    0.01
   );
 };
 

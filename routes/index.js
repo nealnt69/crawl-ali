@@ -842,7 +842,10 @@ async function autoScroll(page) {
 }
 
 const formatPrice = (price, ship, num) => {
-  return Math.ceil((price.replace(",", "") * 1 + ship * 1) / (num * 1)) - 0.01;
+  return (
+    Math.ceil(((price.replaceAll(",", "") * 1 + ship * 1) * (num * 1)) / 0.85) -
+    0.01
+  );
 };
 
 const formatName = (name, length) => {
