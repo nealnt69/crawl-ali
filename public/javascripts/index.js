@@ -106,13 +106,13 @@ $("#download").click(function () {
     ProductFeature5
   );
   if (
-    productType &&
-    BrandName &&
-    TypeKeyword &&
-    ProductFeature1 & ProductFeature2 &&
-    ProductFeature3 &&
-    ProductFeature4 &&
-    ProductFeature5
+    productType.length > 0 &&
+    BrandName.length > 0 &&
+    TypeKeyword.length > 0 &&
+    (ProductFeature1.length > 0) & (ProductFeature2.length > 0) &&
+    ProductFeature3.length > 0 &&
+    ProductFeature4.length > 0 &&
+    ProductFeature5.length > 0
   ) {
     let data = [];
     data.push({
