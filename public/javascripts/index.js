@@ -95,6 +95,16 @@ $("#download").click(function () {
   const ProductFeature3 = $("#ProductFeature3").val();
   const ProductFeature4 = $("#ProductFeature4").val();
   const ProductFeature5 = $("#ProductFeature5").val();
+  console.log(
+    productType,
+    BrandName,
+    TypeKeyword,
+    ProductFeature1,
+    ProductFeature2,
+    ProductFeature3,
+    ProductFeature4,
+    ProductFeature5
+  );
   if (
     productType &&
     BrandName &&
