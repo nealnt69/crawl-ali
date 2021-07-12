@@ -32,6 +32,85 @@
         <span class="close">X</span>
       </div>
     </div>
+    <div id="modal-full-file">
+      <div class="wrap-modal-full-file">
+        <div class="modal-full-file-item">
+          <label for="">Product Type</label>
+          <input
+            id="ProductType"
+            class="input"
+            type="text"
+            autocomplete="chrome-off"
+          />
+        </div>
+        <div class="modal-full-file-item">
+          <label for="">Brand Name</label>
+          <input
+            id="BrandName"
+            class="input"
+            type="text"
+            autocomplete="chrome-off"
+          />
+        </div>
+        <div class="modal-full-file-item">
+          <label for="">Type Keyword</label>
+          <input
+            id="TypeKeyword"
+            class="input"
+            type="text"
+            autocomplete="chrome-off"
+          />
+        </div>
+        <div class="modal-full-file-item">
+          <label for="">Product Feature 1</label>
+          <input
+            id="ProductFeature1"
+            class="input"
+            type="text"
+            autocomplete="chrome-off"
+          />
+        </div>
+        <div class="modal-full-file-item">
+          <label for="">Product Feature 2</label>
+          <input
+            id="ProductFeature2"
+            class="input"
+            type="text"
+            autocomplete="chrome-off"
+          />
+        </div>
+        <div class="modal-full-file-item">
+          <label for="">Product Feature 3</label>
+          <input
+            id="ProductFeature3"
+            class="input"
+            type="text"
+            autocomplete="chrome-off"
+          />
+        </div>
+        <div class="modal-full-file-item">
+          <label for="">Product Feature 4</label>
+          <input
+            id="ProductFeature4"
+            class="input"
+            type="text"
+            autocomplete="chrome-off"
+          />
+        </div>
+        <div class="modal-full-file-item">
+          <label for="">Product Feature 5</label>
+          <input
+            id="ProductFeature5"
+            class="input"
+            type="text"
+            autocomplete="chrome-off"
+          />
+        </div>
+        <div class="modal-full-file-item" style="width: 100%; margin-top: 60px">
+          <button type="text" id="download" class="submit">Tải file</button>
+        </div>
+      </div>
+    </div>
     <div class="form">
       <div class="input-container ic1">
         <input
@@ -110,17 +189,19 @@
           <% listCrawl.forEach(function(crawl){ %>
           <div class="crawl-item">
             <a
-              href="<%= crawl.url ==='link'? '#' : crawl.url %>"
-              target="<%= crawl.url ==='link'? '_self' : '_blank' %>"
+              href="#"
               style="text-decoration: none; line-height: 24px"
               class="crawl-store"
-              ><%= crawl.url ==="link"? crawl.prefix : crawl.url  %></a
+              ><%= crawl.prefix %></a
             >
             <div class="crawl-page">Số trang <%= crawl.page %></div>
             <div class="crawl-date">
               Ngày lấy <%= moment(crawl.created_at).format("DD/MM/YYYY") %>
             </div>
             <div class="crawl-download" id="<%= crawl._id %>">Tải xuống</div>
+            <div class="crawl-download-full" id="<%= crawl._id %>">
+              Tải bản đầy đủ
+            </div>
           </div>
           <% }); %>
         </ul>
