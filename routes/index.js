@@ -41,6 +41,9 @@ router.get("/download", async (req, res) => {
 });
 
 router.post("/crawl", async (req, res) => {
+  if (isCrawling) {
+    return res.status(400).json();
+  }
   const { url, ship, num, prefix, length, mail } = req.body;
   const id = mongoose.Types.ObjectId();
   let listUrl = [];
@@ -83,7 +86,10 @@ router.post("/crawl", async (req, res) => {
   });
   let totalProduct = await page.evaluate(() =>
     parseInt(
-      document.querySelector(".result-info").innerText.replace(/^\D+/g, "")
+      document
+        .querySelector(".result-info")
+        .innerText.replaceAll(",", "")
+        .replace(/^\D+/g, "")
     )
   );
   res.status(200).json({ total: totalProduct, store: id });
@@ -326,6 +332,9 @@ router.post("/crawl", async (req, res) => {
 });
 
 router.post("/crawl/excel", async (req, res) => {
+  if (isCrawling) {
+    return res.status(400).json();
+  }
   const { ship, num, prefix, length, mail } = req.query;
   const workbook = XLSX.read(req.files.file.data);
   const urlExcel = XLSX.utils
@@ -592,11 +601,11 @@ router.post("/crawl/excel", async (req, res) => {
 });
 
 router.get("/crawl", async (req, res) => {
-  const store = req.query.store;
+  const store = await storeModel.findOne({}, {}, { sort: { created_at: -1 } });
   const count = await productModel.countDocuments({
-    store,
+    store: store._id,
   });
-  res.status(200).json({ count });
+  res.status(200).json({ count, store });
 });
 
 router.get("/single", async (req, res) => {
@@ -612,7 +621,7 @@ const wait = (timeToDelay) =>
 
 const crawlProduct = async (url) => {
   try {
-    const html = (await axios(url)).data;
+    const html = (await axios({ url, timeout: 20000 })).data;
     const dom = new JSDOM(html, {
       runScripts: "dangerously",
     });

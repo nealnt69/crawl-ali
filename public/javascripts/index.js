@@ -39,39 +39,49 @@ submit.addEventListener("click", async () => {
     $(".modal-progress-total").text("0");
     submit.disabled = true;
     submit.innerHTML = "Đang lấy dữ liệu, hãy đợi";
-    if (actualBtn.files[0]) {
-      const formData = new FormData();
-      formData.append("file", actualBtn.files[0]);
-      actualBtn.value = null;
-      fileChosen.textContent = "";
-      const res = await axios.post(
-        `/crawl/excel?ship=${ship.value}&num=${num.value}&prefix=${prefix.value}&length=${length.value}&mail=${mail.value}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      localStorage.setItem("crawl", JSON.stringify(res.data));
+    try {
+      if (actualBtn.files[0]) {
+        const formData = new FormData();
+        formData.append("file", actualBtn.files[0]);
+        actualBtn.value = null;
+        fileChosen.textContent = "";
+        const res = await axios.post(
+          `/crawl/excel?ship=${ship.value}&num=${num.value}&prefix=${prefix.value}&length=${length.value}&mail=${mail.value}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        localStorage.setItem("crawl", JSON.stringify(res.data));
+        $("#modal-progress").css("display", "flex");
+        $(".modal-progress-current").text("0");
+        $(".modal-progress-total").text(res.data.total);
+      } else {
+        const res = await axios.post("/crawl", {
+          url: store.value,
+          ship: ship.value,
+          num: num.value,
+          prefix: prefix.value,
+          length: length.value,
+          mail: mail.value,
+        });
+        localStorage.setItem("crawl", JSON.stringify(res.data));
+        $("#modal-progress").css("display", "flex");
+        $(".modal-progress-current").text("0");
+        $(".modal-progress-total").text(res.data.total);
+      }
+      getNumberCrawl();
+    } catch (error) {
+      alert("Đang có người lấy dữ liệu");
       $("#modal-progress").css("display", "flex");
       $(".modal-progress-current").text("0");
-      $(".modal-progress-total").text(res.data.total);
-    } else {
-      const res = await axios.post("/crawl", {
-        url: store.value,
-        ship: ship.value,
-        num: num.value,
-        prefix: prefix.value,
-        length: length.value,
-        mail: mail.value,
-      });
-      localStorage.setItem("crawl", JSON.stringify(res.data));
-      $("#modal-progress").css("display", "flex");
-      $(".modal-progress-current").text("0");
-      $(".modal-progress-total").text(res.data.total);
+      $(".modal-progress-total").text("0");
+      submit.disabled = true;
+      submit.innerHTML = "Đang lấy dữ liệu, hãy đợi";
+      getNumberCrawl();
     }
-    getNumberCrawl();
   } else {
     alert("Hãy nhập hết thông tin");
   }
@@ -106,12 +116,13 @@ $("#download").click(function () {
     ProductFeature5
   );
   if (
-    productType.length > 0 &&
-    BrandName.length > 0 &&
-    TypeKeyword.length > 0 &&
-    (ProductFeature1.length > 0) & (ProductFeature2.length > 0) &&
-    ProductFeature3.length > 0 &&
-    ProductFeature4.length > 0 &&
+    productType.length > 0 ||
+    BrandName.length > 0 ||
+    TypeKeyword.length > 0 ||
+    ProductFeature1.length > 0 ||
+    ProductFeature2.length > 0 ||
+    ProductFeature3.length > 0 ||
+    ProductFeature4.length > 0 ||
     ProductFeature5.length > 0
   ) {
     let data = [];
@@ -531,28 +542,20 @@ const formatName = (name, length) => {
 };
 
 const getNumberCrawl = async () => {
-  const res = await axios(
-    `/crawl?store=${JSON.parse(localStorage.getItem("crawl")).store}`
-  );
-  if (res.data.count >= JSON.parse(localStorage.getItem("crawl")).total) {
+  const res = await axios(`/crawl`);
+  if (res.data.count >= res.data.store.total) {
     clearInterval(getValueInterval);
   }
   $("#modal-progress").css("display", "flex");
   $(".modal-progress-current").text(res.data.count);
-  $(".modal-progress-total").text(
-    JSON.parse(localStorage.getItem("crawl")).total
-  );
+  $(".modal-progress-total").text(res.data.store.total);
   getValueInterval = setInterval(async () => {
-    const res = await axios(
-      `/crawl?store=${JSON.parse(localStorage.getItem("crawl")).store}`
-    );
-    if (res.data.count >= JSON.parse(localStorage.getItem("crawl")).total) {
+    const res = await axios(`/crawl`);
+    if (res.data.count >= res.data.store.total) {
       clearInterval(getValueInterval);
     }
     $("#modal-progress").css("display", "flex");
     $(".modal-progress-current").text(res.data.count);
-    $(".modal-progress-total").text(
-      JSON.parse(localStorage.getItem("crawl")).total
-    );
-  }, 20000);
+    $(".modal-progress-total").text(res.data.store.total);
+  }, 10000);
 };
