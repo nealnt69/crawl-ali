@@ -823,7 +823,9 @@ const filter = (list) => {
       return (
         (item["Ships From"] == "United States" ||
           item["Ships From"] == "US" ||
-          item["Ships From"] == "Hoa Kỳ") &&
+          item["Ships From"] == "Hoa Kỳ" ||
+          item["Ships From"] == "CN" ||
+          item["Ships From"] == "CHINA") &&
         item.qty > 0
       );
     }
