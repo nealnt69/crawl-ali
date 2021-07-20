@@ -629,6 +629,7 @@ const crawlProduct = async (url) => {
     const data = dom.window.runParams.data;
     const sku = data.commonModule.productId;
     const title = data.titleModule.subject;
+    const tradeCount = data.titleModule.tradeCount;
     const linkDescription = data.descriptionModule.descriptionUrl;
     const htmlDescription = (await axios(linkDescription)).data;
     const $ = cheerio.load(htmlDescription);
@@ -679,6 +680,7 @@ const crawlProduct = async (url) => {
     return {
       sku,
       title,
+      tradeCount,
       description,
       ortherImage,
       childrenSku,

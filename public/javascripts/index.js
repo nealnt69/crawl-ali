@@ -119,6 +119,7 @@ $("#download").click(function () {
       "Manufacturer",
     "Use ENGLISH to fill this template.The top 3 rows are for Amazon.com use only. Do not modify or delete the top 3 rows.":
       "Product ID",
+    a0: "",
     a1: "Product ID Type",
     a2: "Link SP",
     a3: "Key Product Features",
@@ -167,6 +168,7 @@ $("#download").click(function () {
       "manufacturer",
     "Use ENGLISH to fill this template.The top 3 rows are for Amazon.com use only. Do not modify or delete the top 3 rows.":
       "external_product_id",
+    a0: "",
     a1: "external_product_id_type",
     a2: "",
     a3: "bullet_point1",
@@ -217,6 +219,7 @@ $("#download").click(function () {
           BrandName,
         "Use ENGLISH to fill this template.The top 3 rows are for Amazon.com use only. Do not modify or delete the top 3 rows.":
           "",
+        a0: product.tradeCount || "",
         a1: "",
         a2: `https://www.aliexpress.com/item/${product.sku}.html`,
         a3: "",
@@ -285,6 +288,7 @@ $("#download").click(function () {
           BrandName,
         "Use ENGLISH to fill this template.The top 3 rows are for Amazon.com use only. Do not modify or delete the top 3 rows.":
           "",
+        a0: product.tradeCount || "",
         a1: "",
         a2: `https://www.aliexpress.com/item/${product.sku}.html`,
         a3: "",
@@ -350,6 +354,14 @@ $("#download").click(function () {
   wb.SheetNames.push("Ali");
 
   var ws = XLSX.utils.json_to_sheet(data);
+  ws["F1"].s = {
+    fill: {
+      type: "pattern",
+      pattern: "solid", // none / solid
+      fgColor: { argb: "FF1c4587" },
+      bgColor: { argb: "FF1c4587" },
+    },
+  };
   // ws.F1.v = "";
   // ws.G1.v = "";
   // ws.H1.v = "";
