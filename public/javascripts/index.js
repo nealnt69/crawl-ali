@@ -354,14 +354,6 @@ $("#download").click(function () {
   wb.SheetNames.push("Ali");
 
   var ws = XLSX.utils.json_to_sheet(data);
-  ws["F1"].s = {
-    fill: {
-      type: "pattern",
-      pattern: "solid", // none / solid
-      fgColor: { argb: "FF1c4587" },
-      bgColor: { argb: "FF1c4587" },
-    },
-  };
   // ws.F1.v = "";
   // ws.G1.v = "";
   // ws.H1.v = "";
@@ -396,6 +388,237 @@ $("#download").click(function () {
   // ws.AO1.v = "";
   // ws.AP1.v = "";
   // ws.AQ1.v = "";
+
+  let listCol = [];
+
+  for (const key in ws) {
+    if (Object.hasOwnProperty.call(ws, key)) {
+      let colName = key.replace(/[0-9]/g, "");
+      if (!listCol.includes(colName) && colName !== "!ref") {
+        listCol.push(colName);
+      }
+    }
+  }
+
+  let totalRow = ws["!ref"].split(":")[1].replace(/\D+/g, "");
+  for (var i = 1; i <= totalRow; i++) {
+    if (ws[`U${i}`].v === "Parent") {
+      listCol.forEach((col) => {
+        ws[`${col}${i}`].s = {
+          font: {
+            color: { rgb: "FF0000" },
+          },
+        };
+      });
+    }
+    if (ws[`U${i}`].v === "") {
+      listCol.forEach((col) => {
+        ws[`${col}${i}`].s = {
+          font: {
+            color: { rgb: "0070C0" },
+          },
+        };
+      });
+    }
+  }
+
+  let array1 = [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+  ];
+  let array2 = ["O", "P", "Q", "R", "S", "T"];
+  let array3 = ["U", "V", "W", "X"];
+  let array4 = ["Y", "Z", "AA"];
+  let array5 = ["AB", "AC", "AD", "AE", "AF", "AG", "AO", "AP", "AQ", "AR"];
+  let array6 = ["AH", "AI", "AJ", "AK", "AL", "AM"];
+  let array7 = ["AN"];
+
+  listCol.forEach((element) => {
+    for (let index = 1; index <= 3; index++) {
+      ws[`${element}${index}`].s = {
+        ...ws[`${element}${index}`].s,
+        border: {
+          top: {
+            style: "thin",
+            color: {
+              rgb: "000000",
+            },
+          },
+          bottom: {
+            style: "thin",
+            color: {
+              rgb: "000000",
+            },
+          },
+          left: {
+            style: "thin",
+            color: {
+              rgb: "000000",
+            },
+          },
+          right: {
+            style: "thin",
+            color: {
+              rgb: "000000",
+            },
+          },
+        },
+      };
+    }
+  });
+
+  array1.forEach((element) => {
+    for (let index = 1; index <= 3; index++) {
+      ws[`${element}${index}`].s = {
+        ...ws[`${element}${index}`].s,
+        font: {
+          bold:
+            index === 1 && ["A", "B", "C", "D", "E"].includes(element)
+              ? true
+              : false,
+          color: { rgb: "000000" },
+        },
+        fill: {
+          patternType: "solid",
+          fgColor: { rgb: "FCD5B4" },
+          bgColor: { rgb: "FCD5B4" },
+        },
+      };
+    }
+  });
+  array2.forEach((element) => {
+    for (let index = 1; index <= 3; index++) {
+      ws[`${element}${index}`].s = {
+        ...ws[`${element}${index}`].s,
+        font: {
+          bold: index === 1 && ["O"].includes(element) ? true : false,
+          color: { rgb: "000000" },
+        },
+        fill: {
+          patternType: "solid",
+          fgColor: { rgb: "FFFF00" },
+          bgColor: { rgb: "FFFF00" },
+        },
+      };
+    }
+  });
+  array3.forEach((element) => {
+    for (let index = 1; index <= 3; index++) {
+      ws[`${element}${index}`].s = {
+        ...ws[`${element}${index}`].s,
+        font: {
+          bold: index === 1 && ["U"].includes(element) ? true : false,
+          color: { rgb: "000000" },
+        },
+        fill: {
+          patternType: "solid",
+          fgColor: { rgb: "FF8080" },
+          bgColor: { rgb: "FF8080" },
+        },
+      };
+    }
+  });
+  array4.forEach((element) => {
+    for (let index = 1; index <= 3; index++) {
+      ws[`${element}${index}`].s = {
+        ...ws[`${element}${index}`].s,
+        font: {
+          bold: index === 1 && ["Y"].includes(element) ? true : false,
+          color: { rgb: "000000" },
+        },
+        fill: {
+          patternType: "solid",
+          fgColor: { rgb: "F8A45E" },
+          bgColor: { rgb: "F8A45E" },
+        },
+      };
+    }
+  });
+  array5.forEach((element) => {
+    for (let index = 1; index <= 3; index++) {
+      ws[`${element}${index}`].s = {
+        ...ws[`${element}${index}`].s,
+        font: {
+          bold: index === 1 && ["AB"].includes(element) ? true : false,
+          color: { rgb: "000000" },
+        },
+        fill: {
+          patternType: "solid",
+          fgColor: { rgb: "92D050" },
+          bgColor: { rgb: "92D050" },
+        },
+      };
+    }
+  });
+  array6.forEach((element) => {
+    for (let index = 1; index <= 3; index++) {
+      ws[`${element}${index}`].s = {
+        ...ws[`${element}${index}`].s,
+        font: {
+          bold: index === 1 && ["AH"].includes(element) ? true : false,
+          color: { rgb: "000000" },
+        },
+        fill: {
+          patternType: "solid",
+          fgColor: { rgb: "BBA680" },
+          bgColor: { rgb: "BBA680" },
+        },
+      };
+    }
+  });
+  array7.forEach((element) => {
+    for (let index = 1; index <= 3; index++) {
+      ws[`${element}${index}`].s = {
+        ...ws[`${element}${index}`].s,
+        font: {
+          bold: index === 1 && ["AN"].includes(element) ? true : false,
+          color: { rgb: "000000" },
+        },
+        fill: {
+          patternType: "solid",
+          fgColor: { rgb: "FF0000" },
+          bgColor: { rgb: "FF0000" },
+        },
+      };
+    }
+  });
+
+  ws["H2"].s = {
+    font: {
+      color: { rgb: "FF0000" },
+    },
+    fill: {
+      patternType: "solid",
+      fgColor: { rgb: "FCD5B4" },
+      bgColor: { rgb: "FCD5B4" },
+    },
+  };
+  ws["I2"].s = {
+    fill: {
+      patternType: "solid",
+      fgColor: { rgb: "92D050" },
+      bgColor: { rgb: "92D050" },
+    },
+  };
+  ws["I3"].s = {
+    fill: {
+      patternType: "solid",
+      fgColor: { rgb: "92D050" },
+      bgColor: { rgb: "92D050" },
+    },
+  };
 
   wb.Sheets["Ali"] = ws;
 
