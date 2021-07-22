@@ -60,7 +60,13 @@ submit.addEventListener("click", async () => {
         $(".modal-progress-total").text(res.data.total);
       } else {
         const res = await axios.post("/crawl", {
-          url: store.value,
+          url: store.value.includes("/item/")
+            ? store.value
+                .replace(/(?:\r\n|\r|\n|\s)/g, "")
+                .split(".html")
+                .filter((item) => item || item.includes("/item/"))
+                .map((item) => `${item}.html`)
+            : store.value,
           ship: ship.value,
           num: num.value,
           prefix: prefix.value,
@@ -119,8 +125,8 @@ $("#download").click(function () {
       "Manufacturer",
     "Use ENGLISH to fill this template.The top 3 rows are for Amazon.com use only. Do not modify or delete the top 3 rows.":
       "Product ID",
-    a0: "",
     a1: "Product ID Type",
+    a0: "Order Ali",
     a2: "Link SP",
     a3: "Key Product Features",
     a4: "Seller SKU",
@@ -168,8 +174,8 @@ $("#download").click(function () {
       "manufacturer",
     "Use ENGLISH to fill this template.The top 3 rows are for Amazon.com use only. Do not modify or delete the top 3 rows.":
       "external_product_id",
-    a0: "",
     a1: "external_product_id_type",
+    a0: "",
     a2: "",
     a3: "bullet_point1",
     a4: "item_sku",

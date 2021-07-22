@@ -44,7 +44,9 @@ router.post("/crawl", async (req, res) => {
   if (isCrawling) {
     return res.status(400).json();
   }
+
   const { url, ship, num, prefix, length, mail } = req.body;
+
   const id = mongoose.Types.ObjectId();
   let listUrl = [];
   let detailProducts = [];
@@ -81,21 +83,89 @@ router.post("/crawl", async (req, res) => {
   await page.type("#fm-login-password", "namnguyen691997");
   await page.click("button[type='submit']");
   await page.waitForNavigation();
-  await page.goto(url, {
-    waitUntil: "domcontentloaded",
-  });
-  let totalProduct = await page.evaluate(() =>
-    parseInt(
-      document
-        .querySelector(".result-info")
-        .innerText.replaceAll(",", "")
-        .replace(/^\D+/g, "")
-    )
-  );
-  res.status(200).json({ total: totalProduct, store: id });
+  let totalProduct = 0;
+  if (Array.isArray(url)) {
+    res.status(200).json({ total: url.length, store: id });
+  } else {
+    await page.goto(url, {
+      waitUntil: "domcontentloaded",
+    });
+    totalProduct = await page.evaluate(() =>
+      parseInt(
+        document
+          .querySelector(".result-info")
+          .innerText.replaceAll(",", "")
+          .replace(/^\D+/g, "")
+      )
+    );
+    res.status(200).json({ total: totalProduct, store: id });
+  }
 
   let stop = 0;
   let index = 1;
+  if (Array.isArray(url)) {
+    stop = 1;
+    let convertListUrl = url;
+    const subArrCount = Math.ceil(convertListUrl.length / 2);
+
+    let subArrUrl = [];
+
+    for (let i = 1; i <= subArrCount; i++) {
+      subArrUrl.push(convertListUrl.slice(2 * (i - 1), 2 * i));
+    }
+    let skip = 0;
+    while (subArrUrl.length > 0) {
+      for (let i = 0; i < subArrUrl.length; i++) {
+        const urls = subArrUrl[i];
+        try {
+          const products = await Promise.all(
+            urls.map((url) => crawlProduct(url))
+          );
+          if (!products) {
+            console.log(products);
+          }
+          console.log(i);
+          skip = 0;
+          detailProducts = [...detailProducts, ...products];
+          if (i === subArrUrl.length - 1) {
+            subArrUrl = [];
+          }
+        } catch (error) {
+          if (skip === 0) {
+            console.log(error?.config?.url);
+            subArrUrl = subArrUrl.slice(i);
+            skip++;
+            await wait(5000);
+            break;
+          } else {
+            if (skip === 3) {
+              subArrUrl = [];
+            } else {
+              subArrUrl = subArrUrl.slice(i + 1);
+            }
+            await wait(5000);
+            break;
+          }
+        }
+      }
+    }
+    await storeModel.updateOne(
+      { _id: id },
+      {
+        url: "List Link",
+        page: 1,
+        ship,
+        num,
+        prefix,
+        length,
+        total: url.length,
+      },
+      { upsert: true }
+    );
+    await productModel.insertMany(
+      detailProducts.map((product) => ({ ...product, store: id }))
+    );
+  }
   while (stop < 1) {
     console.log(index);
     await page.waitForTimeout(2000);
