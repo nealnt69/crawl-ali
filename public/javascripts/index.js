@@ -311,8 +311,8 @@ $("#download").click(function () {
         a13: product.ortherImage[5] || "",
         Variation: !item.type ? "Child" : "",
         a14: !item.type ? `${storeCur.prefix}-${product.sku}` : "",
-        a15: "Variation",
-        a16: "Color",
+        a15: !item.type ? "Variation" : "",
+        a16: !item.type ? "Color" : "",
         Basic: "",
         a17: "",
         a18: product.description
