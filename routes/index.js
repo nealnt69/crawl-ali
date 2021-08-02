@@ -893,11 +893,11 @@ const filter = (list) => {
   return list.filter((item) => {
     if (item["Ships From"]) {
       return (
-        (item["Ships From"] == "United States" ||
-          item["Ships From"] == "US" ||
-          item["Ships From"] == "Hoa Kỳ" ||
-          item["Ships From"] == "CN" ||
-          item["Ships From"] == "CHINA") &&
+        (item["Ships From"].toUpperCase() == "United States" ||
+          item["Ships From"].toUpperCase() == "US" ||
+          item["Ships From"].toUpperCase() == "Hoa Kỳ" ||
+          item["Ships From"].toUpperCase() == "CN" ||
+          item["Ships From"].toUpperCase() == "CHINA") &&
         item.qty > 0
       );
     }
