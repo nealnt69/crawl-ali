@@ -104,6 +104,7 @@ router.post("/crawl", async (req, res) => {
   let stop = 0;
   let index = 1;
   if (Array.isArray(url)) {
+    console.log("cao danh sach link");
     stop = 1;
     let convertListUrl = url;
     const subArrCount = Math.ceil(convertListUrl.length / 2);
@@ -271,133 +272,133 @@ router.post("/crawl", async (req, res) => {
   isCrawling = false;
   console.log("done");
 
-  if (mail) {
-    const products = await productModel.find({
-      store: id,
-    });
-    const store = await storeModel.findById(id);
-    const filterProducts = products.filter((pro) => pro.childrenSku.length > 0);
-    let index = 0;
-    let data = [];
-    filterProducts.forEach((product) => {
-      if (!product.childrenSku[0].type) {
-        data.push({
-          Link: `https://www.aliexpress.com/item/${product.sku}.html`,
-          Id: `${store.prefix}-${product.sku}`,
-          Name: formatName(product.title, store.length),
-          Price: "",
-          Color: "",
-          Description: product.description
-            .replace(
-              /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
-              ""
-            )
-            .replace(/(\r\n|\n|\r)/gm, "")
-            .replace(/<style([\s\S]*?)<\/style>/gi, "")
-            .replace(/<script([\s\S]*?)<\/script>/gi, "")
-            .replace(/<\/div>/gi, "\n")
-            .replace(/<div[^>]*>/gi, "\n")
-            .replace(/<\/li>/gi, "\n")
-            .replace(/<li[^>]*/gi, "\n")
-            .replace(/<\/ul>/gi, "\n")
-            .replace(/<ul[^>]*/gi, "\n")
-            .replace(/<\/p>/gi, "\n")
-            .replace(/<p[^>]*>/gi, "\n")
-            .replace(/<br>/gi, "\n")
-            .replace(/<[^>]*>/gi, "")
-            .trim(),
-          Type: "Parent",
-          parent_sku: "",
-          relationship_type: "",
-          variation_theme: "Color",
-          "Main Image": "",
-          "Other Image 1": "",
-          "Other Image 2": "",
-          "Other Image 3": "",
-          "Other Image 4": "",
-          "Other Image 5": "",
-          "Other Image 6": "",
-        });
-      }
-      product.childrenSku.forEach((item) => {
-        index++;
-        data.push({
-          Link: `https://www.aliexpress.com/item/${product.sku}.html`,
-          Id: `${store.prefix}-${index}-${product.sku}`,
-          Name: formatName(product.title, store.length),
-          Price: formatPrice(item.price, store.ship, store.num),
-          Color: !item.type ? item.composeColor : "",
-          Description: product.description
-            .replace(
-              /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
-              ""
-            )
-            .replace(/(\r\n|\n|\r)/gm, "")
-            .replace(/<style([\s\S]*?)<\/style>/gi, "")
-            .replace(/<script([\s\S]*?)<\/script>/gi, "")
-            .replace(/<\/div>/gi, "\n")
-            .replace(/<div[^>]*>/gi, "\n")
-            .replace(/<\/li>/gi, "\n")
-            .replace(/<li[^>]*/gi, "\n")
-            .replace(/<\/ul>/gi, "\n")
-            .replace(/<ul[^>]*/gi, "\n")
-            .replace(/<\/p>/gi, "\n")
-            .replace(/<p[^>]*>/gi, "\n")
-            .replace(/<br>/gi, "\n")
-            .replace(/<[^>]*>/gi, "")
-            .trim(),
-          Type: !item.type ? "Child" : "",
-          parent_sku: !item.type ? `${store.prefix}-${product.sku}` : "",
-          relationship_type: !item.type ? "Variation" : "",
-          variation_theme: !item.type ? "Color" : "",
-          "Main Image": (item.image || product.ortherImage[0]).replace(
-            "_640x640.jpg",
-            ""
-          ),
-          "Other Image 1": product.ortherImage[0] || "",
-          "Other Image 2": product.ortherImage[1] || "",
-          "Other Image 3": product.ortherImage[2] || "",
-          "Other Image 4": product.ortherImage[3] || "",
-          "Other Image 5": product.ortherImage[4] || "",
-          "Other Image 6": product.ortherImage[5] || "",
-        });
-      });
-    });
-    var wb = XLSX.utils.book_new();
+  // if (mail) {
+  //   const products = await productModel.find({
+  //     store: id,
+  //   });
+  //   const store = await storeModel.findById(id);
+  //   const filterProducts = products.filter((pro) => pro.childrenSku.length > 0);
+  //   let index = 0;
+  //   let data = [];
+  //   filterProducts.forEach((product) => {
+  //     if (!product.childrenSku[0].type) {
+  //       data.push({
+  //         Link: `https://www.aliexpress.com/item/${product.sku}.html`,
+  //         Id: `${store.prefix}-${product.sku}`,
+  //         Name: formatName(product.title, store.length),
+  //         Price: "",
+  //         Color: "",
+  //         Description: product.description
+  //           .replace(
+  //             /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
+  //             ""
+  //           )
+  //           .replace(/(\r\n|\n|\r)/gm, "")
+  //           .replace(/<style([\s\S]*?)<\/style>/gi, "")
+  //           .replace(/<script([\s\S]*?)<\/script>/gi, "")
+  //           .replace(/<\/div>/gi, "\n")
+  //           .replace(/<div[^>]*>/gi, "\n")
+  //           .replace(/<\/li>/gi, "\n")
+  //           .replace(/<li[^>]*/gi, "\n")
+  //           .replace(/<\/ul>/gi, "\n")
+  //           .replace(/<ul[^>]*/gi, "\n")
+  //           .replace(/<\/p>/gi, "\n")
+  //           .replace(/<p[^>]*>/gi, "\n")
+  //           .replace(/<br>/gi, "\n")
+  //           .replace(/<[^>]*>/gi, "")
+  //           .trim(),
+  //         Type: "Parent",
+  //         parent_sku: "",
+  //         relationship_type: "",
+  //         variation_theme: "Color",
+  //         "Main Image": "",
+  //         "Other Image 1": "",
+  //         "Other Image 2": "",
+  //         "Other Image 3": "",
+  //         "Other Image 4": "",
+  //         "Other Image 5": "",
+  //         "Other Image 6": "",
+  //       });
+  //     }
+  //     product.childrenSku.forEach((item) => {
+  //       index++;
+  //       data.push({
+  //         Link: `https://www.aliexpress.com/item/${product.sku}.html`,
+  //         Id: `${store.prefix}-${index}-${product.sku}`,
+  //         Name: formatName(product.title, store.length),
+  //         Price: formatPrice(item.price, store.ship, store.num),
+  //         Color: !item.type ? item.composeColor : "",
+  //         Description: product.description
+  //           .replace(
+  //             /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
+  //             ""
+  //           )
+  //           .replace(/(\r\n|\n|\r)/gm, "")
+  //           .replace(/<style([\s\S]*?)<\/style>/gi, "")
+  //           .replace(/<script([\s\S]*?)<\/script>/gi, "")
+  //           .replace(/<\/div>/gi, "\n")
+  //           .replace(/<div[^>]*>/gi, "\n")
+  //           .replace(/<\/li>/gi, "\n")
+  //           .replace(/<li[^>]*/gi, "\n")
+  //           .replace(/<\/ul>/gi, "\n")
+  //           .replace(/<ul[^>]*/gi, "\n")
+  //           .replace(/<\/p>/gi, "\n")
+  //           .replace(/<p[^>]*>/gi, "\n")
+  //           .replace(/<br>/gi, "\n")
+  //           .replace(/<[^>]*>/gi, "")
+  //           .trim(),
+  //         Type: !item.type ? "Child" : "",
+  //         parent_sku: !item.type ? `${store.prefix}-${product.sku}` : "",
+  //         relationship_type: !item.type ? "Variation" : "",
+  //         variation_theme: !item.type ? "Color" : "",
+  //         "Main Image": (item.image || product.ortherImage[0]).replace(
+  //           "_640x640.jpg",
+  //           ""
+  //         ),
+  //         "Other Image 1": product.ortherImage[0] || "",
+  //         "Other Image 2": product.ortherImage[1] || "",
+  //         "Other Image 3": product.ortherImage[2] || "",
+  //         "Other Image 4": product.ortherImage[3] || "",
+  //         "Other Image 5": product.ortherImage[4] || "",
+  //         "Other Image 6": product.ortherImage[5] || "",
+  //       });
+  //     });
+  //   });
+  //   var wb = XLSX.utils.book_new();
 
-    wb.SheetNames.push("Ali");
+  //   wb.SheetNames.push("Ali");
 
-    var ws = XLSX.utils.json_to_sheet(data);
+  //   var ws = XLSX.utils.json_to_sheet(data);
 
-    wb.Sheets["Ali"] = ws;
+  //   wb.Sheets["Ali"] = ws;
 
-    var wbout = XLSX.write(wb, {
-      type: "buffer",
-      bookType: "xlsx",
-      bookSST: false,
-    });
-    transporter.sendMail(
-      {
-        from: "vietanhcrawlali@gmail.com",
-        to: mail,
-        subject: "Lấy dữ liệu Aliexpress thành công",
-        text: "Đã lấy dữ liệu thành công, hãy tải tệp excel để xem chi tiết",
-        attachments: [
-          {
-            filename: prefix + ".xlsx",
-            content: wbout,
-          },
-        ],
-      },
-      (err, success) => {
-        if (err) {
-          console.log(err);
-        } else {
-          console.log("gửi mail thành công");
-        }
-      }
-    );
-  }
+  //   var wbout = XLSX.write(wb, {
+  //     type: "buffer",
+  //     bookType: "xlsx",
+  //     bookSST: false,
+  //   });
+  //   transporter.sendMail(
+  //     {
+  //       from: "vietanhcrawlali@gmail.com",
+  //       to: mail,
+  //       subject: "Lấy dữ liệu Aliexpress thành công",
+  //       text: "Đã lấy dữ liệu thành công, hãy tải tệp excel để xem chi tiết",
+  //       attachments: [
+  //         {
+  //           filename: prefix + ".xlsx",
+  //           content: wbout,
+  //         },
+  //       ],
+  //     },
+  //     (err, success) => {
+  //       if (err) {
+  //         console.log(err);
+  //       } else {
+  //         console.log("gửi mail thành công");
+  //       }
+  //     }
+  //   );
+  // }
   await browser.close();
 });
 
@@ -540,133 +541,133 @@ router.post("/crawl/excel", async (req, res) => {
 
   isCrawling = false;
   console.log("done");
-  if (mail) {
-    const products = await productModel.find({
-      store: id,
-    });
-    const store = await storeModel.findById(id);
-    const filterProducts = products.filter((pro) => pro.childrenSku.length > 0);
-    let index = 0;
-    let data = [];
-    filterProducts.forEach((product) => {
-      if (!product.childrenSku[0].type) {
-        data.push({
-          Link: `https://www.aliexpress.com/item/${product.sku}.html`,
-          Id: `${store.prefix}-${product.sku}`,
-          Name: formatName(product.title, store.length),
-          Price: "",
-          Color: "",
-          Description: product.description
-            .replace(
-              /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
-              ""
-            )
-            .replace(/(\r\n|\n|\r)/gm, "")
-            .replace(/<style([\s\S]*?)<\/style>/gi, "")
-            .replace(/<script([\s\S]*?)<\/script>/gi, "")
-            .replace(/<\/div>/gi, "\n")
-            .replace(/<div[^>]*>/gi, "\n")
-            .replace(/<\/li>/gi, "\n")
-            .replace(/<li[^>]*/gi, "\n")
-            .replace(/<\/ul>/gi, "\n")
-            .replace(/<ul[^>]*/gi, "\n")
-            .replace(/<\/p>/gi, "\n")
-            .replace(/<p[^>]*>/gi, "\n")
-            .replace(/<br>/gi, "\n")
-            .replace(/<[^>]*>/gi, "")
-            .trim(),
-          Type: "Parent",
-          parent_sku: "",
-          relationship_type: "",
-          variation_theme: "Color",
-          "Main Image": "",
-          "Other Image 1": "",
-          "Other Image 2": "",
-          "Other Image 3": "",
-          "Other Image 4": "",
-          "Other Image 5": "",
-          "Other Image 6": "",
-        });
-      }
-      product.childrenSku.forEach((item) => {
-        index++;
-        data.push({
-          Link: `https://www.aliexpress.com/item/${product.sku}.html`,
-          Id: `${store.prefix}-${index}-${product.sku}`,
-          Name: formatName(product.title, store.length),
-          Price: formatPrice(item.price, store.ship, store.num),
-          Color: !item.type ? item.composeColor : "",
-          Description: product.description
-            .replace(
-              /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
-              ""
-            )
-            .replace(/(\r\n|\n|\r)/gm, "")
-            .replace(/<style([\s\S]*?)<\/style>/gi, "")
-            .replace(/<script([\s\S]*?)<\/script>/gi, "")
-            .replace(/<\/div>/gi, "\n")
-            .replace(/<div[^>]*>/gi, "\n")
-            .replace(/<\/li>/gi, "\n")
-            .replace(/<li[^>]*/gi, "\n")
-            .replace(/<\/ul>/gi, "\n")
-            .replace(/<ul[^>]*/gi, "\n")
-            .replace(/<\/p>/gi, "\n")
-            .replace(/<p[^>]*>/gi, "\n")
-            .replace(/<br>/gi, "\n")
-            .replace(/<[^>]*>/gi, "")
-            .trim(),
-          Type: !item.type ? "Child" : "",
-          parent_sku: !item.type ? `${store.prefix}-${product.sku}` : "",
-          relationship_type: !item.type ? "Variation" : "",
-          variation_theme: !item.type ? "Color" : "",
-          "Main Image": (item.image || product.ortherImage[0]).replace(
-            "_640x640.jpg",
-            ""
-          ),
-          "Other Image 1": product.ortherImage[0] || "",
-          "Other Image 2": product.ortherImage[1] || "",
-          "Other Image 3": product.ortherImage[2] || "",
-          "Other Image 4": product.ortherImage[3] || "",
-          "Other Image 5": product.ortherImage[4] || "",
-          "Other Image 6": product.ortherImage[5] || "",
-        });
-      });
-    });
-    var wb = XLSX.utils.book_new();
+  // if (mail) {
+  //   const products = await productModel.find({
+  //     store: id,
+  //   });
+  //   const store = await storeModel.findById(id);
+  //   const filterProducts = products.filter((pro) => pro.childrenSku.length > 0);
+  //   let index = 0;
+  //   let data = [];
+  //   filterProducts.forEach((product) => {
+  //     if (!product.childrenSku[0].type) {
+  //       data.push({
+  //         Link: `https://www.aliexpress.com/item/${product.sku}.html`,
+  //         Id: `${store.prefix}-${product.sku}`,
+  //         Name: formatName(product.title, store.length),
+  //         Price: "",
+  //         Color: "",
+  //         Description: product.description
+  //           .replace(
+  //             /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
+  //             ""
+  //           )
+  //           .replace(/(\r\n|\n|\r)/gm, "")
+  //           .replace(/<style([\s\S]*?)<\/style>/gi, "")
+  //           .replace(/<script([\s\S]*?)<\/script>/gi, "")
+  //           .replace(/<\/div>/gi, "\n")
+  //           .replace(/<div[^>]*>/gi, "\n")
+  //           .replace(/<\/li>/gi, "\n")
+  //           .replace(/<li[^>]*/gi, "\n")
+  //           .replace(/<\/ul>/gi, "\n")
+  //           .replace(/<ul[^>]*/gi, "\n")
+  //           .replace(/<\/p>/gi, "\n")
+  //           .replace(/<p[^>]*>/gi, "\n")
+  //           .replace(/<br>/gi, "\n")
+  //           .replace(/<[^>]*>/gi, "")
+  //           .trim(),
+  //         Type: "Parent",
+  //         parent_sku: "",
+  //         relationship_type: "",
+  //         variation_theme: "Color",
+  //         "Main Image": "",
+  //         "Other Image 1": "",
+  //         "Other Image 2": "",
+  //         "Other Image 3": "",
+  //         "Other Image 4": "",
+  //         "Other Image 5": "",
+  //         "Other Image 6": "",
+  //       });
+  //     }
+  //     product.childrenSku.forEach((item) => {
+  //       index++;
+  //       data.push({
+  //         Link: `https://www.aliexpress.com/item/${product.sku}.html`,
+  //         Id: `${store.prefix}-${index}-${product.sku}`,
+  //         Name: formatName(product.title, store.length),
+  //         Price: formatPrice(item.price, store.ship, store.num),
+  //         Color: !item.type ? item.composeColor : "",
+  //         Description: product.description
+  //           .replace(
+  //             /<(\w+)\s[^>]*overflow:hidden[^>]*>(\s*)(.*?)(\s*)<[^>]*>/g,
+  //             ""
+  //           )
+  //           .replace(/(\r\n|\n|\r)/gm, "")
+  //           .replace(/<style([\s\S]*?)<\/style>/gi, "")
+  //           .replace(/<script([\s\S]*?)<\/script>/gi, "")
+  //           .replace(/<\/div>/gi, "\n")
+  //           .replace(/<div[^>]*>/gi, "\n")
+  //           .replace(/<\/li>/gi, "\n")
+  //           .replace(/<li[^>]*/gi, "\n")
+  //           .replace(/<\/ul>/gi, "\n")
+  //           .replace(/<ul[^>]*/gi, "\n")
+  //           .replace(/<\/p>/gi, "\n")
+  //           .replace(/<p[^>]*>/gi, "\n")
+  //           .replace(/<br>/gi, "\n")
+  //           .replace(/<[^>]*>/gi, "")
+  //           .trim(),
+  //         Type: !item.type ? "Child" : "",
+  //         parent_sku: !item.type ? `${store.prefix}-${product.sku}` : "",
+  //         relationship_type: !item.type ? "Variation" : "",
+  //         variation_theme: !item.type ? "Color" : "",
+  //         "Main Image": (item.image || product.ortherImage[0]).replace(
+  //           "_640x640.jpg",
+  //           ""
+  //         ),
+  //         "Other Image 1": product.ortherImage[0] || "",
+  //         "Other Image 2": product.ortherImage[1] || "",
+  //         "Other Image 3": product.ortherImage[2] || "",
+  //         "Other Image 4": product.ortherImage[3] || "",
+  //         "Other Image 5": product.ortherImage[4] || "",
+  //         "Other Image 6": product.ortherImage[5] || "",
+  //       });
+  //     });
+  //   });
+  //   var wb = XLSX.utils.book_new();
 
-    wb.SheetNames.push("Ali");
+  //   wb.SheetNames.push("Ali");
 
-    var ws = XLSX.utils.json_to_sheet(data);
+  //   var ws = XLSX.utils.json_to_sheet(data);
 
-    wb.Sheets["Ali"] = ws;
+  //   wb.Sheets["Ali"] = ws;
 
-    var wbout = XLSX.write(wb, {
-      type: "buffer",
-      bookType: "xlsx",
-      bookSST: false,
-    });
-    transporter.sendMail(
-      {
-        from: "vietanhcrawlali@gmail.com",
-        to: mail,
-        subject: "Lấy dữ liệu Aliexpress thành công",
-        text: "Đã lấy dữ liệu thành công, hãy tải tệp excel để xem chi tiết",
-        attachments: [
-          {
-            filename: prefix + ".xlsx",
-            content: wbout,
-          },
-        ],
-      },
-      (err, success) => {
-        if (err) {
-          console.log(err);
-        } else {
-          console.log("gửi mail thành công");
-        }
-      }
-    );
-  }
+  //   var wbout = XLSX.write(wb, {
+  //     type: "buffer",
+  //     bookType: "xlsx",
+  //     bookSST: false,
+  //   });
+  //   transporter.sendMail(
+  //     {
+  //       from: "vietanhcrawlali@gmail.com",
+  //       to: mail,
+  //       subject: "Lấy dữ liệu Aliexpress thành công",
+  //       text: "Đã lấy dữ liệu thành công, hãy tải tệp excel để xem chi tiết",
+  //       attachments: [
+  //         {
+  //           filename: prefix + ".xlsx",
+  //           content: wbout,
+  //         },
+  //       ],
+  //     },
+  //     (err, success) => {
+  //       if (err) {
+  //         console.log(err);
+  //       } else {
+  //         console.log("gửi mail thành công");
+  //       }
+  //     }
+  //   );
+  // }
   await browser.close();
 });
 
