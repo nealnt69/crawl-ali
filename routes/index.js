@@ -67,7 +67,7 @@ router.post("/crawl", async (req, res) => {
   );
   while (stopLogin > 0) {
     await page.click("#fm-login-id");
-    await page.type("#fm-login-id", "songcadantruongcamvy@gmail.com");
+    await page.type("#fm-login-id", "namnt691997@gmail.com");
     await page.click("#fm-login-password");
     await page.waitForTimeout(3000);
     let checkCode = await page.$eval(
@@ -80,7 +80,7 @@ router.post("/crawl", async (req, res) => {
       stopLogin = 0;
     }
   }
-  await page.type("#fm-login-password", "songcadantruongcamvy");
+  await page.type("#fm-login-password", "namnguyen691997");
   await page.click("button[type='submit']");
   await page.waitForNavigation();
   let totalProduct = 0;
