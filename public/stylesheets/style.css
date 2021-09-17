@@ -172,6 +172,11 @@ ul {
   font-weight: 600;
 }
 
+#reset {
+  margin-top: 12px;
+  background-color: #0fca1d;
+}
+
 .submit:active {
   background-color: #06b;
 }

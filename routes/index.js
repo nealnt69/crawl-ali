@@ -23,6 +23,11 @@ var router = express.Router();
 
 let isCrawling = false;
 
+router.post("/stop", async (req, res) => {
+  isCrawling = false;
+  res.status(200).json();
+});
+
 router.get("/", async (req, res) => {
   const listCrawl = await storeModel.find().sort({ created_at: -1 }).limit(30);
   res.render("index", {
@@ -41,10 +46,6 @@ router.get("/download", async (req, res) => {
 });
 
 router.post("/crawl", async (req, res) => {
-  if (isCrawling) {
-    return res.status(400).json();
-  }
-
   const { url, ship, num, prefix, length, mail } = req.body;
 
   const id = mongoose.Types.ObjectId();
@@ -59,6 +60,13 @@ router.post("/crawl", async (req, res) => {
   });
 
   const page = await browser.newPage();
+  const timer = setInterval(async function () {
+    if (!isCrawling) {
+      await browser.close();
+      clearInterval(timer);
+      return res.status(200).json();
+    }
+  }, 1000);
   await page.goto(
     `https://trade.aliexpress.com/order_detail.htm?orderId=9999`,
     {
@@ -403,9 +411,6 @@ router.post("/crawl", async (req, res) => {
 });
 
 router.post("/crawl/excel", async (req, res) => {
-  if (isCrawling) {
-    return res.status(400).json();
-  }
   const { ship, num, prefix, length, mail } = req.query;
   const workbook = XLSX.read(req.files.file.data);
   const urlExcel = XLSX.utils
@@ -421,6 +426,13 @@ router.post("/crawl/excel", async (req, res) => {
   });
 
   const page = await browser.newPage();
+  const timer = setInterval(async function () {
+    if (!isCrawling) {
+      await browser.close();
+      clearInterval(timer);
+      return res.status(200).json();
+    }
+  }, 1000);
   await page.goto(
     `https://trade.aliexpress.com/order_detail.htm?orderId=9999`,
     {
@@ -674,7 +686,7 @@ router.post("/crawl/excel", async (req, res) => {
 router.get("/crawl", async (req, res) => {
   const store = await storeModel.findOne({}, {}, { sort: { created_at: -1 } });
   const count = await productModel.countDocuments({
-    store: store._id,
+    store: store?._id || "",
   });
   res.status(200).json({ count, store });
 });

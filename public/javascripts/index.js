@@ -32,6 +32,11 @@ $(".close").click(() => {
   $("#modal-progress").css("display", "none");
 });
 
+$("#reset").click(() => {
+  axios.post("/stop");
+  window.location.reload();
+});
+
 submit.addEventListener("click", async () => {
   if (store.value && ship.value && num.value && prefix.value && length.value) {
     $("#modal-progress").css("display", "flex");
