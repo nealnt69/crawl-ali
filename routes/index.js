@@ -75,7 +75,7 @@ router.post("/crawl", async (req, res) => {
   );
   while (stopLogin > 0) {
     await page.click("#fm-login-id");
-    await page.type("#fm-login-id", "songcadantruongcamvy@gmail.com");
+    await page.type("#fm-login-id", "vuthithao1304@gmail.com");
     await page.click("#fm-login-password");
     await page.waitForTimeout(3000);
     let checkCode = await page.$eval(
@@ -88,7 +88,7 @@ router.post("/crawl", async (req, res) => {
       stopLogin = 0;
     }
   }
-  await page.type("#fm-login-password", "songcadantruongcamvy");
+  await page.type("#fm-login-password", "vuthithao1304");
   await page.click("button[type='submit']");
   await page.waitForTimeout(5000);
   let totalProduct = 0;
@@ -441,7 +441,7 @@ router.post("/crawl/excel", async (req, res) => {
   );
   while (stopLogin > 0) {
     await page.click("#fm-login-id");
-    await page.type("#fm-login-id", "namnt691997@gmail.com");
+    await page.type("#fm-login-id", "vuthithao1304@gmail.com");
     await page.click("#fm-login-password");
     await page.waitForTimeout(3000);
     let checkCode = await page.$eval(
@@ -454,7 +454,7 @@ router.post("/crawl/excel", async (req, res) => {
       stopLogin = 0;
     }
   }
-  await page.type("#fm-login-password", "namnguyen691997");
+  await page.type("#fm-login-password", "vuthithao1304");
   await page.click("button[type='submit']");
   await page.waitForNavigation();
   res.status(200).json({ total: urlExcel?.length || 0, store: id });
@@ -910,9 +910,9 @@ const filter = (list) => {
   return list.filter((item) => {
     if (item["Ships From"]) {
       return (
-        (item["Ships From"].toUpperCase() == "United States" ||
+        (item["Ships From"].toUpperCase() == "UNITED STATES" ||
           item["Ships From"].toUpperCase() == "US" ||
-          item["Ships From"].toUpperCase() == "Hoa Kỳ" ||
+          item["Ships From"].toUpperCase() == "HOA KỲ" ||
           item["Ships From"].toUpperCase() == "CN" ||
           item["Ships From"].toUpperCase() == "CHINA") &&
         item.qty > 0
