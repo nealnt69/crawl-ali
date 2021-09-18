@@ -56,7 +56,7 @@ router.post("/crawl", async (req, res) => {
   const browser = await puppeteer.launch({
     headless: true,
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    slowMo: 1,
+    slowMo: 50,
   });
 
   const page = await browser.newPage();
@@ -75,7 +75,7 @@ router.post("/crawl", async (req, res) => {
   );
   while (stopLogin > 0) {
     await page.click("#fm-login-id");
-    await page.type("#fm-login-id", "vuthithao1304@gmail.com");
+    await page.type("#fm-login-id", "songcadantruongcamvy@gmail.com");
     await page.click("#fm-login-password");
     await page.waitForTimeout(3000);
     let checkCode = await page.$eval(
@@ -88,9 +88,9 @@ router.post("/crawl", async (req, res) => {
       stopLogin = 0;
     }
   }
-  await page.type("#fm-login-password", "vuthithao1304");
+  await page.type("#fm-login-password", "songcadantruongcamvy");
   await page.click("button[type='submit']");
-  await page.waitForNavigation();
+  await page.waitForTimeout(5000);
   let totalProduct = 0;
   if (Array.isArray(url)) {
     res.status(200).json({ total: url.length, store: id });
@@ -685,10 +685,14 @@ router.post("/crawl/excel", async (req, res) => {
 
 router.get("/crawl", async (req, res) => {
   const store = await storeModel.findOne({}, {}, { sort: { created_at: -1 } });
-  const count = await productModel.countDocuments({
-    store: store?._id || "",
-  });
-  res.status(200).json({ count, store });
+  try {
+    const count = await productModel.countDocuments({
+      store: store?._id,
+    });
+    res.status(200).json({ count, store });
+  } catch (error) {
+    res.status(200).json({ count: 0, store });
+  }
 });
 
 router.get("/single", async (req, res) => {
