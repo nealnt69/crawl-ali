@@ -2,8 +2,10 @@
 <html>
   <head>
     <title><%= title %></title>
+    <link rel="icon" href="images/favicon.ico">
     <link rel="stylesheet" href="/stylesheets/style.css" />
-    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <!-- <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script> -->
+    <script src="/libs/xlsx-style/dist/xlsx.bundle.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"
@@ -33,48 +35,32 @@
       </div>
     </div>
     <div id="modal-full-file">
+      <div id='click-outside'></div>
       <div class="wrap-modal-full-file">
         <div class="modal-full-file-item">
           <label for="">Product Type</label>
           <input
             id="ProductType"
-            class="input"
+            class="input input-excel"
             type="text"
             autocomplete="chrome-off"
           />
         </div>
-        <div class="modal-full-file-item">
-          <label for="">Brand Name</label>
-          <input
-            id="BrandName"
-            class="input"
-            type="text"
-            autocomplete="chrome-off"
-          />
-        </div>
-        <div class="modal-full-file-item">
-          <label for="">Type Keyword</label>
-          <input
-            id="TypeKeyword"
-            class="input"
-            type="text"
-            autocomplete="chrome-off"
-          />
-        </div>
-        <div class="modal-full-file-item">
-          <label for="">Product Feature 1</label>
-          <input
-            id="ProductFeature1"
-            class="input"
-            type="text"
-            autocomplete="chrome-off"
-          />
-        </div>
+
         <div class="modal-full-file-item">
           <label for="">Product Feature 2</label>
           <input
             id="ProductFeature2"
-            class="input"
+            class="input input-excel"
+            type="text"
+            autocomplete="chrome-off"
+          />
+        </div>
+        <div class="modal-full-file-item">
+          <label for="">Item Type Keyword</label>
+          <input
+            id="TypeKeyword"
+            class="input input-excel"
             type="text"
             autocomplete="chrome-off"
           />
@@ -83,16 +69,37 @@
           <label for="">Product Feature 3</label>
           <input
             id="ProductFeature3"
-            class="input"
+            class="input input-excel"
+            type="text"
+            autocomplete="chrome-off"
+          />
+        </div>
+
+        <div class="modal-full-file-item">
+          <label for="">Brand Name</label>
+          <input
+            id="BrandName"
+            class="input input-excel"
+            type="text"
+            autocomplete="chrome-off"
+          />
+        </div>
+
+
+        <div class="modal-full-file-item">
+          <label for="">Product Feature 4</label>
+          <input
+            id="ProductFeature4"
+            class="input input-excel "
             type="text"
             autocomplete="chrome-off"
           />
         </div>
         <div class="modal-full-file-item">
-          <label for="">Product Feature 4</label>
+          <label for="">Product Feature 1</label>
           <input
-            id="ProductFeature4"
-            class="input"
+            id="ProductFeature1"
+            class="input input-excel"
             type="text"
             autocomplete="chrome-off"
           />
@@ -101,7 +108,7 @@
           <label for="">Product Feature 5</label>
           <input
             id="ProductFeature5"
-            class="input"
+            class="input input-excel"
             type="text"
             autocomplete="chrome-off"
           />
@@ -112,16 +119,15 @@
       </div>
     </div>
     <div class="form">
-      <div class="input-container ic1">
-        <input
+        <textarea
           id="store"
           class="input"
           type="text"
           autocomplete="chrome-off"
           placeholder="Link Store"
-        />
-      </div>
-      <div style="margin-bottom: 40px">
+          style="margin-bottom: 24px;"
+        ></textarea>
+      <div style="margin-bottom: 24px;background-color: #fff;padding: 16px;border-radius: 10px;">
         <input type="file" id="actual-btn" accept=".xlsx, .xls," hidden />
         <label id="lable-file" for="actual-btn">Chọn file Excel</label>
         <span id="file-chosen">Không có file nào được chọn</span>
@@ -178,6 +184,9 @@
       <% } %> <% if (!isCrawling) { %>
       <button type="text" id="submit" class="submit">Lấy dữ liệu</button>
       <% } %>
+      <button type="text" id="reset" class="submit">
+        Reset
+      </button>
     </div>
     <div class="content-right">
       <div class="menu">

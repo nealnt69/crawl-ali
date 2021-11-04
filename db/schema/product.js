@@ -6,6 +6,7 @@ const schema = new Schema(
     store: mongoose.ObjectId,
     sku: String,
     title: String,
+    tradeCount: Number,
     description: String,
     ortherImage: Array,
     childrenSku: Array,
