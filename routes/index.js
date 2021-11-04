@@ -52,28 +52,35 @@ router.post("/crawl", async (req, res) => {
   let stopLogin = 1;
   const browser = await puppeteer.launch({
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    slowMo: 1,
+    product: "firefox",
   });
 
   const page = await browser.newPage();
-  await page.goto(
-    `https://trade.aliexpress.com/order_detail.htm?orderId=9999`,
-    {
-      waitUntil: "domcontentloaded",
-    }
-  );
+  await page.goto(`https://trade.aliexpress.com/order_detail.htm?orderId=9999`);
   while (stopLogin > 0) {
+    await page.waitForTimeout(3000);
     await page.click("#fm-login-id");
     await page.type("#fm-login-id", "namnt691997@gmail.com");
     await page.click("#fm-login-password");
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(5000);
     let checkCode = await page.$eval(
       ".fm-checkcode",
       (el) => el?.style?.display || ""
     );
-    if (checkCode === "block") {
-      await page.reload();
+    let checkVertify = await page.$(".fm-error-tip");
+    if (checkCode === "block" || checkVertify) {
+      await page.mouse.drag({ x: 220, y: 300 }, { x: 600, y: 300 });
+      await page.waitForTimeout(2000);
+      let checkCode2 = await page.$eval(
+        ".fm-checkcode",
+        (el) => el?.style?.display || ""
+      );
+      let checkVertify2 = await page.$(".fm-error-tip");
+      if (checkCode2 === "block" || checkVertify2) {
+        await page.reload();
+      } else {
+        stopLogin = 0;
+      }
     } else {
       stopLogin = 0;
     }
@@ -345,28 +352,35 @@ router.post("/crawl/excel", async (req, res) => {
   let stopLogin = 1;
   const browser = await puppeteer.launch({
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    slowMo: 1,
+    product: "firefox",
   });
 
   const page = await browser.newPage();
-  await page.goto(
-    `https://trade.aliexpress.com/order_detail.htm?orderId=9999`,
-    {
-      waitUntil: "domcontentloaded",
-    }
-  );
+  await page.goto(`https://trade.aliexpress.com/order_detail.htm?orderId=9999`);
   while (stopLogin > 0) {
+    await page.waitForTimeout(3000);
     await page.click("#fm-login-id");
     await page.type("#fm-login-id", "namnt691997@gmail.com");
     await page.click("#fm-login-password");
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(5000);
     let checkCode = await page.$eval(
       ".fm-checkcode",
       (el) => el?.style?.display || ""
     );
-    if (checkCode === "block") {
-      await page.reload();
+    let checkVertify = await page.$(".fm-error-tip");
+    if (checkCode === "block" || checkVertify) {
+      await page.mouse.drag({ x: 220, y: 300 }, { x: 600, y: 300 });
+      await page.waitForTimeout(2000);
+      let checkCode2 = await page.$eval(
+        ".fm-checkcode",
+        (el) => el?.style?.display || ""
+      );
+      let checkVertify2 = await page.$(".fm-error-tip");
+      if (checkCode2 === "block" || checkVertify2) {
+        await page.reload();
+      } else {
+        stopLogin = 0;
+      }
     } else {
       stopLogin = 0;
     }
