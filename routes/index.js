@@ -433,7 +433,7 @@ router.post("/crawl/excel", async (req, res) => {
   isCrawling = true;
   let stopLogin = 1;
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: false,
     product: "firefox",
   });
 
@@ -446,12 +446,7 @@ router.post("/crawl/excel", async (req, res) => {
       return res.status(200).json();
     }
   }, 1000);
-  await page.goto(
-    `https://trade.aliexpress.com/order_detail.htm?orderId=9999`,
-    {
-      waitUntil: "domcontentloaded",
-    }
-  );
+  await page.goto(`https://trade.aliexpress.com/order_detail.htm?orderId=9999`);
   while (stopLogin > 0) {
     await page.waitForTimeout(3000);
     await page.click("#fm-login-id");
