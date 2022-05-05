@@ -480,7 +480,7 @@ router.post("/crawl/excel", async (req, res) => {
       stopLogin = 0;
     }
   }
-  await page.type("#fm-login-password", "vuthithao1304");
+  await page.type("#fm-login-password", "Vuthithao@1304");
   await page.click("button[type='submit']");
   await page.waitForNavigation();
   res.status(200).json({ total: urlExcel?.length || 0, store: id });
