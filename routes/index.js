@@ -54,7 +54,7 @@ router.post("/crawl", async (req, res) => {
   isCrawling = true;
   let stopLogin = 1;
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     product: "firefox",
   });
 
@@ -433,7 +433,7 @@ router.post("/crawl/excel", async (req, res) => {
   isCrawling = true;
   let stopLogin = 1;
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     product: "firefox",
   });
 
