@@ -65,8 +65,8 @@ router.post("/crawl", async (req, res) => {
       return res.status(200).json();
     }
   }, 1000);
+  const page = await browser.newPage();
   try {
-    const page = await browser.newPage();
     await page.goto(
       `https://trade.aliexpress.com/order_detail.htm?orderId=9999`
     );
