@@ -2,7 +2,7 @@ const axios = require("axios");
 var express = require("express");
 const jsdom = require("jsdom");
 const cheerio = require("cheerio");
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-extra");
 const { JSDOM } = jsdom;
 const mongoose = require("mongoose");
 const storeModel = require("../db/schema/store");
@@ -10,6 +10,9 @@ const productModel = require("../db/schema/product");
 const moment = require("moment");
 const XLSX = require("xlsx");
 const nodemailer = require("nodemailer");
+const StealthPlugin = require("puppeteer-extra-plugin-stealth");
+
+puppeteer.use(StealthPlugin());
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -55,7 +58,6 @@ router.post("/crawl", async (req, res) => {
   let stopLogin = 1;
   const browser = await puppeteer.launch({
     headless: true,
-    product: "firefox",
   });
 
   const timer = setInterval(async function () {
@@ -440,7 +442,6 @@ router.post("/crawl/excel", async (req, res) => {
   let stopLogin = 1;
   const browser = await puppeteer.launch({
     headless: true,
-    product: "firefox",
   });
 
   const page = await browser.newPage();
