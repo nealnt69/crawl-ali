@@ -58,6 +58,7 @@ router.post("/crawl", async (req, res) => {
   let stopLogin = 1;
   const browser = await puppeteer.launch({
     headless: true,
+    args: ["--no-sandbox"],
   });
 
   const timer = setInterval(async function () {
@@ -442,6 +443,7 @@ router.post("/crawl/excel", async (req, res) => {
   let stopLogin = 1;
   const browser = await puppeteer.launch({
     headless: true,
+    args: ["--no-sandbox"],
   });
 
   const page = await browser.newPage();
