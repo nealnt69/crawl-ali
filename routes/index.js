@@ -48,7 +48,7 @@ router.get("/download", async (req, res) => {
   res.status(200).json({ store, products });
 });
 
-router.post("/crawl", async (req, res) => {
+router.post("/api/crawl", async (req, res) => {
   const { url, ship, num, prefix, length, products } = req.body;
 
   const id = mongoose.Types.ObjectId();
