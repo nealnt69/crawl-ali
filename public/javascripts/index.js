@@ -11,10 +11,6 @@ const actualBtn = document.getElementById("actual-btn");
 
 const fileChosen = document.getElementById("file-chosen");
 
-actualBtn.addEventListener("change", function () {
-  fileChosen.textContent = this.files[0].name;
-});
-
 let getValueInterval;
 let productListFull = [];
 let storeCur = {};
@@ -35,67 +31,6 @@ $(".close").click(() => {
 $("#reset").click(() => {
   axios.post("/stop");
   window.location.reload();
-});
-
-submit.addEventListener("click", async () => {
-  if (store.value && ship.value && num.value && prefix.value && length.value) {
-    $("#modal-progress").css("display", "flex");
-    $(".modal-progress-current").text("0");
-    $(".modal-progress-total").text("0");
-    submit.disabled = true;
-    submit.innerHTML = "Đang lấy dữ liệu, hãy đợi";
-    try {
-      if (actualBtn.files[0]) {
-        const formData = new FormData();
-        formData.append("file", actualBtn.files[0]);
-        actualBtn.value = null;
-        fileChosen.textContent = "";
-        const res = await axios.post(
-          `/crawl/excel?ship=${ship.value}&num=${num.value}&prefix=${prefix.value}&length=${length.value}&mail=${mail.value}`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-        localStorage.setItem("crawl", JSON.stringify(res.data));
-        $("#modal-progress").css("display", "flex");
-        $(".modal-progress-current").text("0");
-        $(".modal-progress-total").text(res.data.total);
-      } else {
-        const res = await axios.post("/crawl", {
-          url: store.value.includes("/item/")
-            ? store.value
-                .replace(/(?:\r\n|\r|\n|\s)/g, "")
-                .split(".html")
-                .filter((item) => item || item.includes("/item/"))
-                .map((item) => `${item}.html`)
-            : store.value,
-          ship: ship.value,
-          num: num.value,
-          prefix: prefix.value,
-          length: length.value,
-          mail: mail.value,
-        });
-        localStorage.setItem("crawl", JSON.stringify(res.data));
-        $("#modal-progress").css("display", "flex");
-        $(".modal-progress-current").text("0");
-        $(".modal-progress-total").text(res.data.total);
-      }
-      getNumberCrawl();
-    } catch (error) {
-      alert("Đang có người lấy dữ liệu");
-      $("#modal-progress").css("display", "flex");
-      $(".modal-progress-current").text("0");
-      $(".modal-progress-total").text("0");
-      submit.disabled = true;
-      submit.innerHTML = "Đang lấy dữ liệu, hãy đợi";
-      getNumberCrawl();
-    }
-  } else {
-    alert("Hãy nhập hết thông tin");
-  }
 });
 
 $(".crawl-download-full").click(async function () {
@@ -784,3 +719,8 @@ const getNumberCrawl = async () => {
     $(".modal-progress-total").text(res.data.store.total);
   }, 10000);
 };
+
+document.getElementById("crawl").addEventListener("click", () => {
+  console.log("ok");
+  window.open(`tracking-app://`);
+});

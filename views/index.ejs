@@ -2,7 +2,7 @@
 <html>
   <head>
     <title><%= title %></title>
-    <link rel="icon" href="images/favicon.ico">
+    <link rel="icon" href="images/favicon.ico" />
     <link rel="stylesheet" href="/stylesheets/style.css" />
     <!-- <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script> -->
     <script src="/libs/xlsx-style/dist/xlsx.bundle.js"></script>
@@ -35,7 +35,7 @@
       </div>
     </div>
     <div id="modal-full-file">
-      <div id='click-outside'></div>
+      <div id="click-outside"></div>
       <div class="wrap-modal-full-file">
         <div class="modal-full-file-item">
           <label for="">Product Type</label>
@@ -85,12 +85,11 @@
           />
         </div>
 
-
         <div class="modal-full-file-item">
           <label for="">Product Feature 4</label>
           <input
             id="ProductFeature4"
-            class="input input-excel "
+            class="input input-excel"
             type="text"
             autocomplete="chrome-off"
           />
@@ -118,78 +117,9 @@
         </div>
       </div>
     </div>
-    <div class="form">
-        <textarea
-          id="store"
-          class="input"
-          type="text"
-          autocomplete="chrome-off"
-          placeholder="Link Store"
-          style="margin-bottom: 24px;"
-        ></textarea>
-      <div style="margin-bottom: 24px;background-color: #fff;padding: 16px;border-radius: 10px;">
-        <input type="file" id="actual-btn" accept=".xlsx, .xls," hidden />
-        <label id="lable-file" for="actual-btn">Chọn file Excel</label>
-        <span id="file-chosen">Không có file nào được chọn</span>
-      </div>
-      <div class="input-container ic2">
-        <input
-          id="ship"
-          class="input"
-          type="text"
-          autocomplete="chrome-off"
-          placeholder="Shipping Price"
-        />
-      </div>
-      <div class="input-container ic2">
-        <input
-          id="num"
-          class="input"
-          type="text"
-          autocomplete="chrome-off"
-          placeholder="Hệ số lãi"
-        />
-      </div>
-      <div class="input-container ic2">
-        <input
-          id="prefix"
-          class="input"
-          type="text"
-          autocomplete="chrome-off"
-          placeholder="Prefix"
-        />
-      </div>
-      <div class="input-container ic2">
-        <input
-          id="length"
-          class="input"
-          type="text"
-          autocomplete="chrome-off"
-          placeholder="Độ dài Tiêu đề"
-        />
-      </div>
-      <div class="input-container ic2">
-        <input
-          id="mail"
-          class="input"
-          type="text"
-          autocomplete="chrome-off"
-          placeholder="Email nhận thông báo"
-        />
-      </div>
-      <% if (isCrawling) { %>
-      <button type="text" id="submit" disabled class="submit">
-        Đang lấy dữ liệu, hãy đợi
-      </button>
-      <% } %> <% if (!isCrawling) { %>
-      <button type="text" id="submit" class="submit">Lấy dữ liệu</button>
-      <% } %>
-      <button type="text" id="reset" class="submit">
-        Reset
-      </button>
-    </div>
     <div class="content-right">
       <div class="menu">
+        <div id="crawl" class="menu-item">Crawl</div>
         <div id="progress" class="menu-item">Xem tiến độ</div>
         <div id="history" class="menu-item">Lịch sử tìm kiếm</div>
       </div>
