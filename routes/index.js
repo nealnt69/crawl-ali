@@ -49,28 +49,27 @@ router.get("/download", async (req, res) => {
 });
 
 router.post("/api/crawl", async (req, res) => {
-  const { url, ship, num, prefix, length, products } = req.body;
+  const { oldId = "", url, ship, num, prefix, length, products } = req.body;
 
-  const id = mongoose.Types.ObjectId();
-  console.log(req.body);
-  res.json({});
-
-  await storeModel.updateOne(
-    { _id: id },
-    {
-      url: "List Link",
-      page: 1,
-      ship,
-      num,
-      prefix,
-      length,
-      total: url.length,
-    },
-    { upsert: true }
-  );
-  await productModel.insertMany(
-    products.map((product) => ({ ...product, store: id }))
-  );
+  console.log(oldId);
+  const id = oldId || mongoose.Types.ObjectId();
+  if (!oldId) {
+    await storeModel.updateOne(
+      { _id: id },
+      {
+        url: "List Link",
+        page: 1,
+        ship,
+        num,
+        prefix,
+        length,
+        total: url.length,
+      },
+      { upsert: true }
+    );
+  }
+  await productModel.create({ ...products, store: id });
+  res.json({ id: id });
 });
 
 router.post("/crawl/excel", async (req, res) => {
