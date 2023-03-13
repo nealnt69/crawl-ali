@@ -38,6 +38,7 @@ $(".crawl-download-full").click(async function () {
   const res = await axios(`/download?id=${id}`);
   const { store, products } = res.data;
   productListFull = products;
+  console.log(productListFull);
   storeCur = store;
   $("#modal-full-file").css("display", "flex");
 });
