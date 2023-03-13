@@ -580,7 +580,7 @@ $(".crawl-download").click(async function () {
   const id = $(this).attr("id");
   const res = await axios(`/download?id=${id}`);
   const { store, products } = res.data;
-  const filterProducts = products.filter((pro) => pro.childrenSku.length > 0);
+  const filterProducts = products;
   let index = 0;
   let data = [];
   filterProducts.forEach((product) => {
