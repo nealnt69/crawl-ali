@@ -156,7 +156,7 @@ $("#download").click(function () {
   });
   let index = 1;
   productListFull.forEach((product) => {
-    if (!product.childrenSku[0] && !product.childrenSku[0].type) {
+    if (product.childrenSku[0] && !product.childrenSku[0].type) {
       data.push({
         "TemplateType=fptcustom": productType,
         "Version=2021.0709": TypeKeyword,
@@ -584,7 +584,7 @@ $(".crawl-download").click(async function () {
   let index = 0;
   let data = [];
   filterProducts.forEach((product) => {
-    if (!product.childrenSku[0] && !product.childrenSku[0].type) {
+    if (product.childrenSku[0] && !product.childrenSku[0].type) {
       data.push({
         Link: `https://www.aliexpress.com/item/${product.sku}.html`,
         Id: `${store.prefix}-${product.sku}`,
